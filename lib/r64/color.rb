@@ -1,5 +1,3 @@
-require 'rubygame'
-
 module R64
 
   class InvalidColorError < StandardError
