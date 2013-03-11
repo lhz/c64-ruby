@@ -24,7 +24,7 @@ module R64
     end
 
     def self.from_rgba(value, default = nil)
-      from_rgb value >> 8
+      from_rgb value >> 8, default
     end
 
     def self.from_rgb(value, default = nil)
