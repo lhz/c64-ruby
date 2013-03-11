@@ -126,7 +126,7 @@ module R64
     end
 
     # Extract sprite data
-    def to_sprite(opt)
+    def sprite(opt)
       opt[:w] ||= (double_pixels? ? 48 : 24)
       opt[:h] ||= 21
       if opt[:color].is_a?(Array)
