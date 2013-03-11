@@ -77,7 +77,7 @@ describe R64::Color do
         subject.guess_from_rgb(rgb).should eq index
       end
     end
-    it "correctly guesses the index of some colors not in the palette" do
+    it "correctly guesses the index of colors not in the palette" do
       colors = {
         0xFF4040 => 10, 0x30E030 => 13, 0x101050 =>  6, 0xD0D000 =>  7,
         0x702020 =>  2, 0x208020 =>  5, 0x4040E0 => 14, 0x101010 =>  0,
