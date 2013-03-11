@@ -95,47 +95,61 @@ module R64
       palette && @palette.merge!(hash)
     end
 
-    def self.rgb_to_hsb(rgb_value)
-      r = ((rgb_value & 0xFF0000) >> 16) / 255.0
-      g = ((rgb_value & 0x00FF00) >>  8) / 255.0
-      b = (rgb_value & 0x0000FF) / 255.0
-
-      min, max = [r, g, b].minmax
-
-      hue = Math.atan2(Math.sqrt(3) * (g - b), 2 * r - g - b)
-      sat = [min, max].all?(&:zero?) ? 0.0 : ((max - min) / max * 100)
-      brt = max
-
-      [hue, sat, brt]
-    end
-
-    # R64::Color.palette.each { |k, v| puts "%06X: %2d %2d" % [k, v, R64::Color.guess_from_rgb(k)] }
-
+    # Guess C64 color index from given 24-bit RGB value
     def self.guess_from_rgb(value)
-      h, s, b = rgb_to_hsb(value)
+      h, s, v = rgb_to_hsv(value)
       if s < 0.2
-        case b * 100
+        case v * 100
         when 0...15  then 0
-        when 15...37 then 11
-        when 37...50 then 12
-        when 50...75 then 15
+        when 15...35 then 11
+        when 35...49 then 12
+        when 49...66 then 15
         else
           1
         end
       else
-        case h * 32
-        when 3...9   then 3
-        when 9...14  then (b < 0.62 ? 5 : 13)
-        when 14...17 then 7
-        when 17...19 then 9
-        when 19...21 then 8
-        when 21...25 then (b < 0.41 ? 2 : 10)
-        when 25...30 then 4
-        when 30...33 then
+        case h
+        when 21...42   then 8
+        when 42...59   then 9
+        when 59...84   then 7
+        when 84...145  then v < 0.65 ? 5 : 13
+        when 145...218 then 3
+        when 218...264 then v < 0.60 ? 6 : 14
+        when 264...325 then 4
         else
-          (b < 0.36 ? 6 : 14)
+          v < 0.52 ? 2 : 10
         end
       end
+    end
+
+    # Convert 24-bit RGB value to HSV triplet (0-360, 0-1, 0-1)
+    def self.rgb_to_hsv(rgb_value)
+      r = ((rgb_value & 0xFF0000) >> 16) / 255.0
+      g = ((rgb_value & 0x00FF00) >>  8) / 255.0
+      b = (rgb_value & 0x0000FF) / 255.0
+      max = [r, g, b].max
+      min = [r, g, b].min
+      delta = max - min
+      v = max
+      if (max > 0)
+	s = delta / max
+      else
+	s = 0.0
+      end
+      if (s == 0.0)
+	h = 0.0
+      else
+	if (r == max)
+          h = (g - b) / delta
+	elsif (g == max)
+          h = 2 + (b - r) / delta
+	elsif (b == max)
+          h = 4 + (r - g) / delta
+	end
+	h *= 60.0
+        h += 360.0 if h < 0
+      end
+      [h, s, v]
     end
 
   end
