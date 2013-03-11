@@ -60,8 +60,7 @@ describe R64::Color do
 
   describe "palette" do
     it "returns a hash with 24-bit color values as keys" do
-      subject.palette.keys.should include(0xD5D5D5)
-      subject.palette.keys.should include(0x6C5EB5)
+      subject.palette.keys.all? {|k| (0...2**24).include? k }.should be_true
     end
     it "returns a hash with at least 16 distinct keys" do
       subject.palette.keys.sort.uniq.size.should be >= 16
