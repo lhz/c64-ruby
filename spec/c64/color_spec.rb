@@ -11,26 +11,6 @@ describe C64::Color do
     end
   end
 
-  describe "xterm_ansi" do
-    it "maps an index into an ANSI sequence to set foreground color" do
-      subject.xterm_ansi(3).should eq "\033[38;5;6m"
-    end
-    it "maps an index into an ANSI sequence to set background color" do
-      subject.xterm_ansi(7, true).should eq "\033[48;5;185m"
-    end
-  end
-
-  describe "xterm_dump" do
-    it "starts with an ANSI sequence to set background color" do
-      subject.should_receive(:xterm_ansi).with(4, true).once.and_call_original
-      subject.xterm_dump(4)
-    end
-    it "ends with a sequence of spaces" do
-      subject.xterm_dump(4).should end_with("  ")
-      subject.xterm_dump(4, true).should end_with("    ")
-    end
-  end
-
   describe "from_rgba" do
     it "delegates to from_rgb without the alpha component" do
       subject.should_receive(:from_rgb).with(0x123456, nil).once
@@ -86,6 +66,26 @@ describe C64::Color do
       colors.each do |rgb, index|
         subject.guess_from_rgb(rgb).should eq index
       end
+    end
+  end
+
+  describe "xterm256_escape" do
+    it "maps an index into an ANSI sequence to set foreground color" do
+      subject.xterm256_escape(3).should eq "\033[38;5;6m"
+    end
+    it "maps an index into an ANSI sequence to set background color" do
+      subject.xterm256_escape(7, true).should eq "\033[48;5;185m"
+    end
+  end
+
+  describe "xterm256_dump" do
+    it "starts with an ANSI sequence to set background color" do
+      subject.should_receive(:xterm256_escape).with(4, true).once.and_call_original
+      subject.xterm256_dump(4)
+    end
+    it "ends with a sequence of spaces" do
+      subject.xterm256_dump(4).should end_with("  ")
+      subject.xterm256_dump(4, true).should end_with("    ")
     end
   end
 

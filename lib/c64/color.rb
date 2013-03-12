@@ -31,20 +31,6 @@ module C64
       palette[value] || default || guess_from_rgb(value)
     end
 
-    def self.xterm_ansi(index, bg = false)
-      map = [
-        0x10, 0x0f, 0x34, 0x06,
-        0x05, 0x02, 0x13, 0xb9,
-        0x5e, 0x3a, 0x83, 0xee,
-        0xf3, 0x72, 0x3f, 0xf8,
-      ]
-      "\033[#{bg ? 48 : 38};5;#{map[index]}m"
-    end
-
-    def self.xterm_dump(index, double = false)
-      xterm_ansi(index, true) + (double ? "    " : "  ")
-    end
-
     def self.palette
       @palette ||= {
         # VICE
@@ -150,6 +136,20 @@ module C64
         h += 360.0 if h < 0
       end
       [h, s, v]
+    end
+
+    def self.xterm256_escape(index, bg = false)
+      map = [
+        0x10, 0x0f, 0x34, 0x06,
+        0x05, 0x02, 0x13, 0xb9,
+        0x5e, 0x3a, 0x83, 0xee,
+        0xf3, 0x72, 0x3f, 0xf8,
+      ]
+      "\033[#{bg ? 48 : 38};5;#{map[index]}m"
+    end
+
+    def self.xterm256_dump(index, double = false)
+      xterm256_escape(index, true) + (double ? "    " : "  ")
     end
 
   end
