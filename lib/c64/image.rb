@@ -1,7 +1,7 @@
 require 'oily_png'
 require 'matrix'
 
-module R64
+module C64
   class Image
 
     attr_reader :bitmap, :colmap, :screen
@@ -55,7 +55,7 @@ module R64
     # Convert image to two-dimentional array of C64 color indexes
     def pixel_matrix(rect = rectangle)
       @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-        R64::Color.from_rgba @image[x, y]
+        C64::Color.from_rgba @image[x, y]
       end
     end
 

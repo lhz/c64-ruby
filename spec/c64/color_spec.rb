@@ -1,6 +1,6 @@
-require 'r64/color'
+require 'c64/color'
 
-describe R64::Color do
+describe C64::Color do
 
   describe "from_symbol" do
     it "takes lowercase symbols" do

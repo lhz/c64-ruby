@@ -1,4 +1,4 @@
-module R64
+module C64
 
   module Color
 

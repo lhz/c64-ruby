@@ -1,4 +1,4 @@
-# R64
+# c64-ruby
 
 ## Summary
 

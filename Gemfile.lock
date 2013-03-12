@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    r64 (0.0.1)
+    c64-ruby (0.0.1)
       chunky_png (~> 1.2.7)
       oily_png (~> 1.1.0)
 
@@ -32,6 +32,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  c64-ruby!
   pry (~> 0.9.12)
-  r64!
   rspec (~> 2.13.0)

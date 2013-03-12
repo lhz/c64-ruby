@@ -1,7 +1,7 @@
-require 'r64/version'
+require 'c64/version'
 require 'matrix'
 
-module R64
+module C64
 end
 
 
