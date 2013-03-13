@@ -27,7 +27,7 @@ module C64
     end
 
     def self.from_rgb(value, default = nil)
-      palette[value] || default || guess_from_rgb(value)
+      merged_palettes[value] || default || guess_from_rgb(value)
     end
 
     def self.from_rgba(value, default = nil)
@@ -42,12 +42,6 @@ module C64
       else
         raise "Invalid palette type :#{palette}."
       end
-    end
-
-    def self.palette
-      @palette ||= palette_vice.
-        merge(palette_vice_old).
-        merge(palette_pepto)
     end
 
     def self.xterm256_escape(index, bg = false)
@@ -65,8 +59,14 @@ module C64
     end
 
 
-    private
+    # "private"
 
+
+    def self.merged_palettes
+      @merged_palettes ||= palette_pepto.
+        merge(palette_vice_old).
+        merge(palette_vice)
+    end
 
     def self.palette_vice_old
       { 0x000000 => BLACK,

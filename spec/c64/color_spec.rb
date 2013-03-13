@@ -22,17 +22,14 @@ describe C64::Color do
 
   describe "from_rgb" do
     it "looks up index in palette and returns it" do
-      subject.should_receive(:palette).once.and_call_original
       subject.should_not_receive(:guess_from_rgb)
       subject.from_rgb(0x8F8F8F).should eq 15
     end
-    it "looks up index in palette and uses passed default if not found" do
-      subject.should_receive(:palette).once.and_call_original
+    it "looks up index in palette and uses passed default when not found" do
       subject.should_not_receive(:guess_from_rgb)
       subject.from_rgb(0x123456, 123).should eq 123
     end
-    it "looks up index in palette and calls guess_from_rgb if not found" do
-      subject.should_receive(:palette).once.and_call_original
+    it "looks up index in palette and calls guess_from_rgb when not found" do
       subject.should_receive(:guess_from_rgb).with(0x123456).once
       subject.from_rgb(0x123456)
     end
@@ -47,15 +44,15 @@ describe C64::Color do
     end
   end
 
-  describe "palette" do
+  describe "merged_palettes" do
     it "returns a hash with 24-bit color values as keys" do
-      subject.palette.keys.all? {|k| (0...2**24).include? k }.should be_true
+      subject.merged_palettes.keys.all? {|k| (0...2**24).include? k }.should be_true
     end
     it "returns a hash with at least 16 distinct keys" do
-      subject.palette.keys.sort.uniq.size.should be >= 16
+      subject.merged_palettes.keys.sort.uniq.size.should be >= 16
     end
     it "returns a hash with C64 color indices as values" do
-      subject.palette.values.all? {|v| (0..15).include? v }.should be_true
+      subject.merged_palettes.values.all? {|v| (0..15).include? v }.should be_true
     end
   end
 
@@ -68,7 +65,7 @@ describe C64::Color do
   #
   describe "guess_from_rgb" do
     it "correctly guesses the index of all colors in the palette" do
-      subject.palette.each do |rgb, index|
+      subject.merged_palettes.each do |rgb, index|
         subject.guess_from_rgb(rgb).should eq(index)
       end
     end
