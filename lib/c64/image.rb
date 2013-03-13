@@ -107,7 +107,7 @@ module C64
 
     # Extract multicolor charset
     def charset_multi(x, y, cols, rows, clist)
-      pixel_matrix x: x, y: y, w: 8 * cols, h: 8 * rows # , debug: true
+      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , debug: true
       Matrix.build(rows, cols).flat_map do |r, c|
         char_multi 8 * c, 8 * r, clist
       end
@@ -115,7 +115,7 @@ module C64
 
     # Extract hires charset
     def charset_hires(x, y, cols, rows, color)
-      pixel_matrix x: x, y: y, w: 8 * cols, h: 8 * rows # , debug: true
+      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , debug: true
       Matrix.build(rows, cols).flat_map do |r, c|
         char_hires 8 * c, 8 * r, color
       end
@@ -158,7 +158,7 @@ module C64
     # Extract a set of sprites
     def sprites(x, y, cols, rows, clist)
       Matrix.build(rows, cols) { |r, c|
-        to_sprite x: x + c * 24, y: y + r * 21, w: 24, h: 21, color: clist
+        to_sprite :x => x + c * 24, :y => y + r * 21, :w => 24, :h => 21, :color => clist
       }.to_a.flatten
     end
 
@@ -426,53 +426,6 @@ module C64
     end
 
     private
-
-    # Map RGB-triplet string to C64 color index
-    def self.rgb_to_c64(str)
-      @palette ||= {
-        # VICE palette
-        "\x00\x00\x00" => C64::Color::BLACK,
-        "\xd5\xd5\xd5" => C64::Color::WHITE,
-        "\x72\x35\x2c" => C64::Color::RED,
-        "\x65\x9f\xa6" => C64::Color::CYAN,
-        "\x73\x3a\x91" => C64::Color::PURPLE,
-        "\x56\x8d\x35" => C64::Color::GREEN,
-        "\x2e\x23\x7d" => C64::Color::BLUE,
-        "\xae\xb7\x5e" => C64::Color::YELLOW,
-        "\x77\x4f\x1e" => C64::Color::ORANGE,
-        "\x4b\x3c\x00" => C64::Color::BROWN,
-        "\x9c\x63\x5a" => C64::Color::LIGHT_RED,
-        "\x47\x47\x47" => C64::Color::DARK_GREY,
-        "\x6b\x6b\x6b" => C64::Color::MEDIUM_GREY,
-        "\x8f\xc2\x71" => C64::Color::LIGHT_GREEN,
-        "\x67\x5d\xb6" => C64::Color::LIGHT_BLUE,
-        "\x8f\x8f\x8f" => C64::Color::LIGHT_GREY,
-        # GIMP palette
-        "\x00\x00\x00" => C64::Color::BLACK,
-        "\xff\xff\xff" => C64::Color::WHITE,
-        "\x68\x37\x2b" => C64::Color::RED,
-        "\x70\xa4\xb2" => C64::Color::CYAN,
-        "\x6f\x3d\x86" => C64::Color::PURPLE,
-        "\x58\x8d\x43" => C64::Color::GREEN,
-        "\x35\x28\x79" => C64::Color::BLUE,
-        "\xb8\xc7\x6f" => C64::Color::YELLOW,
-        "\x6f\x4f\x25" => C64::Color::ORANGE,
-        "\x43\x39\x00" => C64::Color::BROWN,
-        "\x9a\x67\x59" => C64::Color::LIGHT_RED,
-        "\x44\x44\x44" => C64::Color::DARK_GREY,
-        "\x6c\x6c\x6c" => C64::Color::MEDIUM_GREY,
-        "\x9a\xd2\x84" => C64::Color::LIGHT_GREEN,
-        "\x6c\x5e\xb5" => C64::Color::LIGHT_BLUE,
-        "\x95\x95\x95" => C64::Color::LIGHT_GREY,
-        # PAL extra
-        "\xc1\xc1\xc1" => C64::Color::WHITE,
-        "\xc5\xc5\xc5" => C64::Color::WHITE,
-        "\x8b\x8b\x8b" => C64::Color::LIGHT_GREY,
-        # "\x70\x70\x70" => C64::Color::MEDIUM_GREY,
-      }
-      (@palette[str] || 0) or
-        raise "Unknown color: #{str.unpack('C3').map{|v|'\\x%02x' % [v]}.join} (#{@palette.inspect})"
-    end
 
     def dump_sprite_sc(pa, sd)
       (0..20).map { |r|
