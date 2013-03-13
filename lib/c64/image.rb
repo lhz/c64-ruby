@@ -1,4 +1,4 @@
-require 'oily_png'
+require 'chunky_png'
 require 'matrix'
 require 'c64/color'
 
