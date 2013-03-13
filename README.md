@@ -1,5 +1,7 @@
 # c64-ruby
 
+[![Build Status](https://travis-ci.org/lhz/c64-ruby.png)](https://travis-ci.org/lhz/c64-ruby)
+
 ## Summary
 
 Ruby library and tools for Commodore 64 development
