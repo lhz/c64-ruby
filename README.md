@@ -29,14 +29,26 @@ LIGHT_GREEN  # => 13
 C64::Color.from_symbol(:blue)   # => 6
 C64::Color.from_symbol(:PURPLE) # => 4
 
-# Index from 32-bit RGBA value (alpha is ignored)
-C64::Color.from_rgba(0xFF000080) # => 10
-
 # Index from 24-bit RGB value
-C64::Color.from_rgba(0x00FFFF) # => 3
+C64::Color.from_rgb(0x00FFFF) # => 3
+
+# Index from 32-bit RGBA value (alpha is simply ignored)
+C64::Color.from_rgba(0xFF000080) # => 10
 
 # Predefined palette
 C64::Color.palette # => {0x000000 => 0, 0xD5D5D5 => 1, ...}
+
+# ANSI foreground color sequence resembling the given index
+C64::Color.xterm256_escape(3) # => "\033[38;5;6m"
+
+# ANSI background color sequence resembling the given index
+C64::Color.xterm256_escape(7, true) # => "\033[48;5;185m"
+
+# Output a string of colored spaces describing a hires pixel
+C64::Color.xterm256_dump(4) # => "\033[48;5;5m  "
+
+# Output a string of colored spaces describing a multicolor pixel
+C64::Color.xterm256_dump(2, true) # => "\033[48;5;52m    "
 ```
 
 ## Todo
