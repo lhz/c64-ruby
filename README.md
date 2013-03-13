@@ -6,7 +6,6 @@ Ruby library and tools for Commodore 64 development
 
 ## C64::Color
 
-<<<<<<< HEAD
 This module is responsible for providing conversion from
 24-bit RGB values, 32-bit RGBA values and symbolic names
 to C64 color indexes.
@@ -19,8 +18,8 @@ one of the 16 colors in the C64 VIC-II chip's palette.
 ```ruby
 include C64::Color::Names
 
-puts RED          # => 2
-puts LIGHT_GREEN  # => 13
+RED          # => 2
+LIGHT_GREEN  # => 13
 ```
 
 ### Methods
