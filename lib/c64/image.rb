@@ -107,7 +107,7 @@ module C64
 
     # Extract multicolor charset
     def charset_multi(x, y, cols, rows, clist)
-      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , debug: true
+      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , :debug => true
       Matrix.build(rows, cols).flat_map do |r, c|
         char_multi 8 * c, 8 * r, clist
       end
@@ -115,7 +115,7 @@ module C64
 
     # Extract hires charset
     def charset_hires(x, y, cols, rows, color)
-      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , debug: true
+      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , :debug => true
       Matrix.build(rows, cols).flat_map do |r, c|
         char_hires 8 * c, 8 * r, color
       end
