@@ -4,6 +4,7 @@
 .config
 .rvmrc
 .pryrc
+.rspec
 coverage
 InstalledFiles
 lib/bundler/man

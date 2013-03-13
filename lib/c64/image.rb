@@ -1,5 +1,6 @@
 require 'oily_png'
 require 'matrix'
+require 'c64/color'
 
 module C64
   class Image
@@ -7,19 +8,18 @@ module C64
     attr_reader :bitmap, :colmap, :screen
 
     # Read image/frames from given filename
-    def initialize(filename, double_pixels = false)
-      @image = ChunkyPNG::Image.from_file(filename)
-      self.double_pixels = double_pixels
+    def initialize(filename)
+      @png = ChunkyPNG::Image.from_file(filename)
     end
 
     # Width of image in pixels
     def width
-      @image.width
+      @png.width
     end
 
     # Height of image in pixels
     def height
-      @image.height
+      @png.height
     end
 
     # Width of image in chars
@@ -32,30 +32,67 @@ module C64
       (height / 8.0).ceil
     end
 
-    # Image has double width pixels?
-    def double_pixels?
-      @double_pixels
+    # Width of a pixel (1 for hires, 2 for multicolor)
+    def pixel_width
+      @pixel_width ||= (double_pixels_detected? ? 2 : 1)
     end
 
-    # Set whether image has double width pixels
-    def double_pixels=(value)
-      @double_pixels = (value ? true : false)
+    # Set pixel width
+    def pixel_width=(value)
+      if value == 1 || value == 2
+        @pixel_width = value
+      else
+        raise "Pixel width must be 1 or 2!"
+      end
     end
 
-    def set_pixel(x, y, color)
+    # Read the color index of a pixel
+    def [](x, y)
+      check_bounds(x, y)
+      pixels[y, x]
+    end
+
+    # Modify the color index of a pixel
+    def []=(x, y, color)
+      pixels unless @pixels
+      check_bounds(x, y)
       @pixels[y, x] = color
+      if pixel_width == 2
+        @pixels[y, (x % 2 == 0) ? x + 1 : x - 1] = color
+      end
     end
 
-    def rectangle
+    private
+
+    def check_bounds(x, y)
+      raise IndexError.new if (x < 0 || x >= width || y < 0 || y >= height)
+    end
+
+    def double_pixels_detected?(options = {})
+      if options[:fast]
+        [width - 1, height].min.times.all? { |i|
+          self[i, i] == self[i, i + 1]
+        }
+      else
+        height.times.all? { |y|
+          0.step(width - 1, 2).all? { |x|
+            self[x, y] == self[x + 1, y]
+          }
+        }
+      end
+    end
+
+    # Rectangle surrounding the complete image
+    def full_rectangle
       upper_left  = Point[0, 0]
       lower_right = Point[width - 1, height - 1]
       Rectangle[upper_left, lower_right]
     end
 
     # Convert image to two-dimentional array of C64 color indexes
-    def pixel_matrix(rect = rectangle)
+    def pixels(rect = full_rectangle)
       @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-        C64::Color.from_rgba @image[x, y]
+        C64::Color.from_rgba @png[x, y]
       end
     end
 

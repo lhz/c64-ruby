@@ -38,6 +38,15 @@ describe C64::Color do
     end
   end
 
+  describe "to_rgb" do
+    it "returns the RGB value of the given index using the default palette" do
+      subject.to_rgb(14).should eq(0X6C5EB5)
+    end
+    it "returns the RGB value of the given index using the specified palette" do
+      subject.to_rgb(14, :vice).should eq(0x5F53FE)
+    end
+  end
+
   describe "palette" do
     it "returns a hash with 24-bit color values as keys" do
       subject.palette.keys.all? {|k| (0...2**24).include? k }.should be_true
@@ -50,17 +59,24 @@ describe C64::Color do
     end
   end
 
+  # Run the below code in REPL to debug HSL values for palette
+  #
+  #   C64::Color.palette_vice_old.each do |rgb, i|
+  #     h, s, l = C64::Color.send(:rgb_to_hsl, rgb)
+  #     puts "%02d   %06X   %5.1f  %5.3f  %5.3f" % [i, rgb, h, s, l]
+  #   end
+  #
   describe "guess_from_rgb" do
     it "correctly guesses the index of all colors in the palette" do
       subject.palette.each do |rgb, index|
-        subject.guess_from_rgb(rgb).should eq index
+        subject.guess_from_rgb(rgb).should eq(index)
       end
     end
     it "correctly guesses the index of colors not in the palette" do
       colors = {
-        0xFF4040 => 10, 0x30E030 => 13, 0x101050 =>  6, 0xD0D000 =>  7,
+        0xFF4040 => 10, 0x60F060 => 13, 0x101050 =>  6, 0xD0D000 =>  7,
         0x702020 =>  2, 0x208020 =>  5, 0x4040E0 => 14, 0x101010 =>  0,
-        0xD000D0 =>  4, 0x00D0D0 =>  3, 0xC0A020 =>  9, 0x806040 =>  8,
+        0xD000D0 =>  4, 0x00D0D0 =>  3, 0xC0A020 =>  8, 0x504020 =>  9,
         0xF0F0F0 =>  1, 0xA0A0A0 => 15, 0x707070 => 12, 0x404040 => 11,
       }
       colors.each do |rgb, index|
