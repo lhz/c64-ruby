@@ -13,11 +13,6 @@ to C64 color indexes.
 A color index is a number in the [0-15] range, representing
 one of the 16 colors in the C64 VIC-II chip's palette.
 
-### Constants
-
-```ruby
-```
-
 ### Examples
 
 ```ruby
