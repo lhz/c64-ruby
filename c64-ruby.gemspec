@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.version       = C64::VERSION
 
   gem.add_dependency "chunky_png", "~> 1.2.7"
-  gem.add_dependency "oily_png", "~> 1.1.0"
+  gem.add_dependency "oily_png", "~> 1.1.0" if gem.platform == 'ruby'
 
   gem.add_development_dependency "rspec", "~> 2.13.0"
   gem.add_development_dependency "pry", "~> 0.9.12"
