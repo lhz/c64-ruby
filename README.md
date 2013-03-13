@@ -32,6 +32,10 @@ C64::Color.from_rgb(0x00FFFF)  # => 3
 # Index from 32-bit RGBA value (alpha is simply ignored)
 C64::Color.from_rgba(0xFF000080)  # => 10
 
+# 24-bit RGB value from index
+C64::Color.to_rgb(14, :pepto)  # => 0x6C5EB5
+C64::Color.to_rgb(14, :vice)   # => 0x5F53FE
+
 # Predefined palette
 C64::Color.palette  # => {0x000000 => 0, 0xD5D5D5 => 1, ...}
 
