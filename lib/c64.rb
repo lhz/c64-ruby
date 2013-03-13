@@ -1,4 +1,6 @@
 require 'c64/version'
+require 'c64/color'
+require 'c64/image'
 require 'matrix'
 
 module C64
