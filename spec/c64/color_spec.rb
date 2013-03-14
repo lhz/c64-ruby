@@ -2,6 +2,30 @@ require 'c64/color'
 
 describe C64::Color do
 
+  include C64::Color::Methods
+  class TestNames; include C64::Color::Names; end
+
+  describe C64::Color::Names do
+    it "exposes color names as constants" do
+      TestNames.const_get('LIGHT_BLUE').should eq 14
+    end
+  end
+
+  describe C64::Color::Methods do
+    it "adds method #color to Symbol, returning color index" do
+      :blue.should respond_to(:color)
+      :blue.color.should eq 6
+    end
+    it "adds method #color to Fixnum, returning color index" do
+      0xF0F020.should respond_to(:color)
+      0xF0F020.color.should eq 7
+    end
+    it "adds method #rgb to Fixnum, returning 32-bit RGB value" do
+      4.should respond_to(:rgb)
+      4.rgb.should eq 0x6F3D86
+    end
+  end
+
   describe "from_symbol" do
     it "takes lowercase symbols" do
       subject.from_symbol(:light_red).should eq 10
