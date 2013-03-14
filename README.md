@@ -17,13 +17,34 @@ one of the 16 colors in the C64 VIC-II chip's palette.
 
 ### Examples
 
-```ruby
+Include color name constants into our namespace:
 
-# Include color name constants into our namespace
+```ruby
 include C64::Color::Names
 RED  # => 2
 LIGHT_GREEN  # => 13
+```
 
+Add new instance methods to Symbol and Fixnum.
+
+```ruby
+include C64::Color::Methods
+
+# Index from symbol
+:blue.color    # => 6
+:PURPLE.color  # => 4
+
+# Index from 24-bit RGB-value
+0x00FFFF.color  # => 3
+
+# 24-bit RGB value from index (optionally specifying a palette)
+4.rgb         # => 0x6F3D86
+4.rgb(:vice)  # => 0xB41AE2
+```
+
+Same functionality as above, without polluting standard classes:
+
+```ruby
 # Index from symbol
 C64::Color.from_symbol(:blue)    # => 6
 C64::Color.from_symbol(:PURPLE)  # => 4
@@ -37,7 +58,11 @@ C64::Color.from_rgba(0xFF000080)  # => 10
 # 24-bit RGB value from index
 C64::Color.to_rgb(14, :pepto)  # => 0x6C5EB5
 C64::Color.to_rgb(14, :vice)   # => 0x5F53FE
+```
 
+Other module methods
+
+```ruby
 # Predefined palette
 C64::Color.palette  # => {0x000000 => 0, 0xD5D5D5 => 1, ...}
 

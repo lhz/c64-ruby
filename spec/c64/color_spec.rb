@@ -23,6 +23,7 @@ describe C64::Color do
     it "adds method #rgb to Fixnum, returning 32-bit RGB value" do
       4.should respond_to(:rgb)
       4.rgb.should eq 0x6F3D86
+      4.rgb(:vice).should eq 0xB41AE2
     end
   end
 
