@@ -21,11 +21,12 @@ Include color name constants into our namespace:
 
 ```ruby
 include C64::Color::Names
-RED  # => 2
+
+RED          # => 2
 LIGHT_GREEN  # => 13
 ```
 
-Add new instance methods to Symbol and Fixnum.
+Add some convenient instance methods to Symbol and Fixnum:
 
 ```ruby
 include C64::Color::Methods
@@ -38,11 +39,14 @@ include C64::Color::Methods
 0x00FFFF.color  # => 3
 
 # 24-bit RGB value from index (optionally specifying a palette)
-4.rgb         # => 0x6F3D86
-4.rgb(:vice)  # => 0xB41AE2
+4.rgb              # => 0x6F3D86
+4.rgb(:vice)       # => 0xB41AE2
+# Same, using constants added by C64::Color::Names
+YELLOW.rgb         # => 0xB8C76F
+YELLOW.rgb(:vice)  # => 0xDFF60A
 ```
 
-Same functionality as above, without polluting standard classes:
+Same functionality as above, but without polluting core classes:
 
 ```ruby
 # Index from symbol
@@ -60,11 +64,12 @@ C64::Color.to_rgb(14, :pepto)  # => 0x6C5EB5
 C64::Color.to_rgb(14, :vice)   # => 0x5F53FE
 ```
 
-Other module methods
+Other module methods:
 
 ```ruby
-# Predefined palette
-C64::Color.palette  # => {0x000000 => 0, 0xD5D5D5 => 1, ...}
+# Predefined palettes
+C64::Color.palette_vice   # => {0x000000 => 0, 0xFDFEFC => 1, ...}
+C64::Color.palette_pepto  # => {0x000000 => 0, 0xFFFFFF => 1, ...}
 
 # ANSI foreground color sequence resembling the given index
 C64::Color.xterm256_escape(3)  # => "\033[38;5;6m"
