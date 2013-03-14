@@ -23,17 +23,19 @@ module C64
     include Names
 
     module Methods
-      class ::Symbol
-        def color
-          C64::Color.from_symbol(self)
+      def self.included(base)
+        Symbol.class_eval do
+          def color
+            C64::Color.from_symbol(self)
+          end
         end
-      end
-      class ::Fixnum
-        def color(default = nil)
-          C64::Color.from_rgb(self, default)
-        end
-        def rgb(palette = :pepto)
-          C64::Color.to_rgb(self, palette)
+        Fixnum.class_eval do
+          def color(default = nil)
+            C64::Color.from_rgb(self, default)
+          end
+          def rgb(palette = :pepto)
+            C64::Color.to_rgb(self, palette)
+          end
         end
       end
     end
