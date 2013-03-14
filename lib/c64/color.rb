@@ -22,6 +22,13 @@ module C64
 
     include Names
 
+    def color(value)
+      case value
+      when Symbol  then C64::Color.from_symbol(value)
+      when Integer then C64::Color.from_rgb(value)
+      end
+    end
+
     def self.from_symbol(symbol)
       const_get symbol.to_s.upcase.to_sym
     end
