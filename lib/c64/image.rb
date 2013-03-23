@@ -62,10 +62,16 @@ module C64
       end
     end
 
+    def within_bounds?(x, y)
+      x >= 0 && x < width && y >= 0 && y < height
+    end
+
+
     private
 
+
     def check_bounds(x, y)
-      raise IndexError.new if (x < 0 || x >= width || y < 0 || y >= height)
+      raise IndexError.new if !within_bounds?(x, y)
     end
 
     def double_pixels_detected?(options = {})
