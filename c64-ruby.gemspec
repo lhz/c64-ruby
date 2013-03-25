@@ -15,6 +15,7 @@ Gem::Specification.new do |gem|
   gem.version       = C64::VERSION
 
   gem.add_dependency "chunky_png", "~> 1.2.7"
+  gem.add_dependency "rubygame", "~> 2.6.4"
 
   gem.add_development_dependency "pry", "~> 0.9.12"
 end
