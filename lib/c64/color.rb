@@ -68,10 +68,11 @@ module C64
     end
 
     def self.to_rubygame_color(rgb_value)
+      require 'rubygame'
       r = ((rgb_value & 0xFF0000) >> 16) / 255.0
       g = ((rgb_value & 0x00FF00) >>  8) / 255.0
       b = (rgb_value & 0x0000FF) / 255.0
-      Rubygame::Color::ColorRGB.new([r / 255.0, g / 255.0, b / 255.0])
+      Rubygame::Color::ColorRGB.new([r, g, b])
     end
 
     def self.xterm256_escape(index, bg = false)
