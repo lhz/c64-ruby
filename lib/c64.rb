@@ -1,6 +1,7 @@
 require 'c64/version'
 require 'c64/color'
 require 'c64/image'
+require 'c64/math'
 require 'matrix'
 
 module C64

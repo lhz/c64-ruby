@@ -61,6 +61,11 @@ module C64
       end
     end
 
+    def self.[](value)
+      index = (value.is_a?(Symbol) ? from_symbol(value) : value)
+      to_rubygame_color to_rgb(index)
+    end
+
     def self.from_symbol(symbol)
       const_get symbol.to_s.upcase.to_sym
     end
@@ -79,6 +84,14 @@ module C64
       else
         raise "Invalid palette key :#{palette}."
       end
+    end
+
+    def self.to_rubygame_color(rgb_value)
+      require 'rubygame'
+      r = ((rgb_value & 0xFF0000) >> 16) / 255.0
+      g = ((rgb_value & 0x00FF00) >>  8) / 255.0
+      b = (rgb_value & 0x0000FF) / 255.0
+      Rubygame::Color::ColorRGB.new([r, g, b])
     end
 
     def self.xterm256_escape(index, bg = false)
