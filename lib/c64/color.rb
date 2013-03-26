@@ -20,6 +20,8 @@ module C64
       LIGHT_GREY   = 15
     end
 
+    include Names
+
     PALETTES = {
       :pepto => [
         0x000000, 0xffffff, 0x68372b, 0x70a4b2,
@@ -40,8 +42,6 @@ module C64
         0x6b6b6b, 0x8fc271, 0x675db6, 0x8f8f8f,
       ]
     }
-
-    include Names
 
     module CoreExtensions
       def self.included(base)
@@ -146,12 +146,9 @@ module C64
     end
 
     # Convert 24-bit RGB value to HSL triplet (0-360, 0-1, 0-1)
-    def self.rgb_to_hsl(rgb_value)
-      r = ((rgb_value & 0xFF0000) >> 16) / 255.0
-      g = ((rgb_value & 0x00FF00) >>  8) / 255.0
-      b = (rgb_value & 0x0000FF) / 255.0
-      max = [r, g, b].max
-      min = [r, g, b].min
+    def self.rgb_to_hsl(rgb24)
+      r, g, b = [16, 8, 0].map {|b| ((rgb24 >> b) & 255) / 255.0 }
+      min, max = [r, g, b].minmax
       delta = max - min
       luma = (0.30 * r) + (0.59 * g) + (0.11 * b)
       if (max > 0)
