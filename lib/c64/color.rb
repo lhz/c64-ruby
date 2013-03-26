@@ -20,9 +20,30 @@ module C64
       LIGHT_GREY   = 15
     end
 
+    PALETTES = {
+      :pepto => [
+        0x000000, 0xffffff, 0x68372b, 0x70a4b2,
+        0x6f3d86, 0x588d43, 0x352879, 0xb8c76f,
+        0x6f4f25, 0x433900, 0x9a6759, 0x444444,
+        0x6c6c6c, 0x9ad284, 0x6c5eb5, 0x959595
+      ],
+      :vice => [
+        0x000000, 0xfdfefc, 0xbe1a24, 0x30e6c6,
+        0xb41ae2, 0x1fd21e, 0x211bae, 0xdff60a,
+        0xb84104, 0x6a3304, 0xfe4a57, 0x424540,
+        0x70746f, 0x59fe59, 0x5f53fe, 0xa4a7a2,
+      ],
+      :vice_old => [
+        0x000000, 0xd5d5d5, 0x72352c, 0x659fa6,
+        0x733a91, 0x568d35, 0x2e237d, 0xaeb75e,
+        0x774f1e, 0x4b3c00, 0x9c635a, 0x474747,
+        0x6b6b6b, 0x8fc271, 0x675db6, 0x8f8f8f,
+      ]
+    }
+
     include Names
 
-    module Methods
+    module CoreExtensions
       def self.included(base)
         Symbol.class_eval do
           def color
@@ -53,12 +74,10 @@ module C64
     end
 
     def self.to_rgb(index, palette = :pepto)
-      case palette
-      when :vice     then palette_vice.key(index)
-      when :vice_old then palette_vice_old.key(index)
-      when :pepto    then palette_pepto.key(index)
+      if PALETTES.has_key? palette
+        PALETTES[palette][index]
       else
-        raise "Invalid palette type :#{palette}."
+        raise "Invalid palette key :#{palette}."
       end
     end
 
@@ -80,67 +99,11 @@ module C64
     # "private"
 
 
+    # Hash of all palettes merged with RGB as keys and index as value
     def self.merged_palettes
-      @merged_palettes ||= palette_pepto.
-        merge(palette_vice_old).
-        merge(palette_vice)
-    end
-
-    def self.palette_vice_old
-      { 0x000000 => BLACK,
-        0xD5D5D5 => WHITE,
-        0x72352C => RED,
-        0x659FA6 => CYAN,
-        0x733A91 => PURPLE,
-        0x568D35 => GREEN,
-        0x2E237D => BLUE,
-        0xAEB75E => YELLOW,
-        0x774F1E => ORANGE,
-        0x4B3C00 => BROWN,
-        0x9C635A => LIGHT_RED,
-        0x474747 => DARK_GREY,
-        0x6B6B6B => MEDIUM_GREY,
-        0x8FC271 => LIGHT_GREEN,
-        0x675DB6 => LIGHT_BLUE,
-        0x8F8F8F => LIGHT_GREY }
-    end
-
-    def self.palette_vice
-      { 0x000000 => BLACK,
-        0xFDFEFC => WHITE,
-        0xBE1A24 => RED,
-        0x30E6C6 => CYAN,
-        0xB41AE2 => PURPLE,
-        0x1FD21E => GREEN,
-        0x211BAE => BLUE,
-        0xDFF60A => YELLOW,
-        0xB84104 => ORANGE,
-        0x6A3304 => BROWN,
-        0xFE4A57 => LIGHT_RED,
-        0x424540 => DARK_GREY,
-        0x70746F => MEDIUM_GREY,
-        0x59FE59 => LIGHT_GREEN,
-        0x5F53FE => LIGHT_BLUE,
-        0xA4A7A2 => LIGHT_GREY }
-    end
-
-    def self.palette_pepto
-      { 0x000000 => BLACK,
-        0XFFFFFF => WHITE,
-        0X68372B => RED,
-        0X70A4B2 => CYAN,
-        0X6F3D86 => PURPLE,
-        0X588D43 => GREEN,
-        0X352879 => BLUE,
-        0XB8C76F => YELLOW,
-        0X6F4F25 => ORANGE,
-        0X433900 => BROWN,
-        0X9A6759 => LIGHT_RED,
-        0X444444 => DARK_GREY,
-        0X6C6C6C => MEDIUM_GREY,
-        0X9AD284 => LIGHT_GREEN,
-        0X6C5EB5 => LIGHT_BLUE,
-        0X959595 => LIGHT_GREY }
+      @merged_palettes ||= PALETTES.values.each_with_object({}) do |a, h|
+        h.merge! Hash[a.map.with_index.to_a]
+      end
     end
 
     # Guess C64 color index from given 24-bit RGB value

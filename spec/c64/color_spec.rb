@@ -2,7 +2,6 @@ require 'c64/color'
 
 describe C64::Color do
 
-  include C64::Color::Methods
   class TestNames; include C64::Color::Names; end
 
   describe C64::Color::Names do
@@ -11,7 +10,8 @@ describe C64::Color do
     end
   end
 
-  describe C64::Color::Methods do
+  describe C64::Color::CoreExtensions do
+    include C64::Color::CoreExtensions
     it "adds method #color to Symbol, returning color index" do
       :blue.should respond_to(:color)
       :blue.color.should eq 6
