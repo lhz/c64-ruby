@@ -147,7 +147,7 @@ module C64
 
     # Convert 24-bit RGB value to HSL triplet (0-360, 0-1, 0-1)
     def self.rgb_to_hsl(rgb24)
-      r, g, b = [16, 8, 0].map {|b| ((rgb24 >> b) & 255) / 255.0 }
+      r, g, b = [16, 8, 0].map {|n| ((rgb24 >> n) & 255) / 255.0 }
       min, max = [r, g, b].minmax
       delta = max - min
       luma = (0.30 * r) + (0.59 * g) + (0.11 * b)
