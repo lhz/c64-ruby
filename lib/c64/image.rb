@@ -66,8 +66,18 @@ module C64
       x >= 0 && x < width && y >= 0 && y < height
     end
 
+    def save_png(filename, palette = :pepto)
+      png = ChunkyPNG::Image.new(width, height)
+      height.times do |y|
+        width.times do |x|
+          png[x, y] = ((C64::Color.to_rgb(pixels[y, x], palette) << 8) | 0xFF)
+        end
+      end
+      png.save(filename)
+    end
 
-    private
+
+    # private
 
 
     def check_bounds(x, y)
@@ -153,6 +163,34 @@ module C64
         o[0] += o[1] if c == color
         o[1] >>= 1
       }[0]
+    end
+
+    def to_koala(bcol)
+      cells = Matrix.build(25, 40).map do |row, column|
+        cell_multi(column, row, bcol)
+      end
+      screen = cells.map {|c| c[0] }
+      colmap = cells.map {|c| c[1] }
+      bitmap = cells.flat_map {|c| c[2] }
+      [screen, colmap, bitmap]
+    end
+
+    def cell_multi(column, row, bcol = 0)
+      cpix = Matrix.build(8, 4).flat_map do |y, x|
+        pixels[8 * row + y, 8 * column + pixel_width * x]
+      end
+      cols = (most_used_colors(cpix, bcol) + [bcol] * 3).first(3).sort
+      bytes = 8.times.map do |y|
+        4.times.map do |x|
+          mask = 2 ** (6 - x * 2)
+          c = cpix[y * 4 + x]
+          if c != bcol && !cols.include?(c)
+            c = nearest_color_in_set(c, cols + [bcol])
+          end
+          mask * ((cols.index(c) || -1) + 1)
+        end.reduce(:+)
+      end
+      [cols[0] * 16 + cols[1], cols[2], bytes]
     end
 
     # Calculate histogram data of pixel color distribution
