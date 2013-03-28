@@ -172,8 +172,7 @@ module C64
 	elsif (b == max)
           hue = 4 + (r - g) / delta
 	end
-	hue *= 60.0
-        hue += 360.0 if hue < 0
+	hue = (hue * 60.0) % 360
       end
       [hue, sat, luma]
     end
