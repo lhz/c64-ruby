@@ -172,7 +172,7 @@ module C64
       screen = cells.map {|c| c[0] }
       colmap = cells.map {|c| c[1] }
       bitmap = cells.flat_map {|c| c[2] }
-      [screen, colmap, bitmap]
+      bitmap + screen + colmap + [bcol]
     end
 
     def cell_multi(column, row, bcol = 0)
