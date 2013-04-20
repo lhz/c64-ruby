@@ -165,6 +165,17 @@ module C64
       }[0]
     end
 
+    def write_bitmap_multi(base_path, bcol, addr)
+      koala = to_koala(bcol)
+      range = { :bitmap => 0..7999, :screen => 8000..8999, :colmap => 9000..9999 }
+      [:bitmap, :screen, :colmap].each do |part|
+        File.open("#{base_path}-#{part}.bin", 'wb') do |bm|
+          bm.write [addr[part]].pack('S')
+          bm.write koala[range[part]].pack('C*')
+        end
+      end
+    end
+
     def to_koala(bcol)
       cells = Matrix.build(25, 40).map do |row, column|
         cell_multi(column, row, bcol)
@@ -270,8 +281,8 @@ module C64
       @bitmap = Array.new(8000) { 0 }
       @screen = Array.new(1000) { 0 }
       pixels = pixel_matrix
-      0.upto(charheight - 1) do |r|
-        0.upto(charwidth - 1) do |c|
+      0.upto(char_height - 1) do |r|
+        0.upto(char_width - 1) do |c|
           cpix = (0..7).map { |y|
             (0..7).map { |x| pixels[r * 8 + y][c * 8 + x] }
           }
@@ -296,8 +307,8 @@ module C64
 
     # Convert image to C64 multicolor bitmap
     def convert_multicolor_bitmap(options = {})
-      cols = options[:cols] || charwidth
-      rows = options[:rows] || charheight
+      cols = options[:cols] || char_width
+      rows = options[:rows] || char_height
       xoff = options[:xoff] || 0
       yoff = options[:yoff] || 0
       bcol = options[:bcol] || 0
@@ -424,13 +435,13 @@ module C64
     end
 
     def fix_color_bugs(filename, bcol = 0)
-      cols = charwidth
-      rows = charheight
+      cols = char_width
+      rows = char_height
       source = pixel_matrix
       target = Array.new(height) { Array.new(width) }
       changed = 0
-      0.upto(charheight - 1) do |r|
-        0.upto(charwidth - 1) do |c|
+      0.upto(char_height - 1) do |r|
+        0.upto(char_width - 1) do |c|
           cpix = (0..7).map { |y|
             (0..3).map { |x|
               source[r * 8 + y][c * 4 + x]
