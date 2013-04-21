@@ -1,3 +1,5 @@
+require 'c64'
+
 # Extend task class
 class Rake::Task
 
