@@ -70,7 +70,7 @@ task :binaries
 
 # Link object files into uncompiled program
 desc "Link object files into uncompiled program, binaries not included."
-task :uncompiled_program => ["startup.o", "#{PROJECT}.o"] do |t|
+task :program_uncompiled => ["startup.o", "#{PROJECT}.o"] do |t|
   config_file = File.join(SHARED, 'linker.cfg')
   labels_file = '/tmp/x64-labels.lab'
   if t.dependencies_changed?(t.prerequisites, [UNCOMPILED_PRG])
@@ -81,7 +81,7 @@ end
 
 # Compile executable and binaries
 desc "Created compiled program, including binaries."
-task :compiled_program => [:uncompiled_program, :binaries] do |t|
+task :program_compiled => [:program_uncompiled, :binaries] do |t|
   binaries = Rake::Task[:binaries].prerequisites.map {|tn|
     Rake::Task[tn].output
   }.flatten.compact
@@ -93,7 +93,7 @@ end
 
 # Run program in emulator
 desc "Run compiled program in emulator."
-task :run => :compiled_program do |t|
+task :run => :program_compiled do |t|
   sh "x64 #{COMPILED_PRG} >/dev/null"
 end
 
