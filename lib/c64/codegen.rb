@@ -15,6 +15,10 @@ class C64::Codegen
     @lines << [:label, string]
   end
 
+  def comment(string)
+    @lines << [:comment, string]
+  end
+
   def blank
     @lines << [:blank]
   end
@@ -38,6 +42,8 @@ class C64::Codegen
           file.write "\n"
         when :label
           file.write "#{line[1]}:"
+        when :comment
+          file.write "\t; #{line[1]}\n"
         when :code
           mnemonic, mode, value, comment = line[1..4]
           op = opcode(mnemonic, mode)
