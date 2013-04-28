@@ -1,5 +1,7 @@
 require 'c64'
 
+$:.unshift('./lib')
+
 # Extend task class
 class Rake::Task
 
@@ -106,4 +108,6 @@ task :clean do
 end
 
 # Set default task - run program
-task :default => :run
+if File.exists?("#{PROJECT}.s")
+  task :default => :run
+end
