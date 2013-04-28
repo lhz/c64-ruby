@@ -120,6 +120,18 @@ class C64::ScaledScreen < Rubygame::Screen
                           color_by_index(color))
   end
 
+  def draw_arc(xpos, ypos, radius, angle1, angle2, color)
+    surface.draw_arc(inner_point(xpos + radius, ypos + radius),
+                     radius, [angle1, angle2],
+                     color_by_index(color))
+  end
+
+  def fill_arc(xpos, ypos, radius, angle1, angle2, color)
+    surface.draw_arc_s(inner_point(xpos + radius, ypos + radius),
+                       radius, [angle1, angle2],
+                       color_by_index(color))
+  end
+
   def circle(args)
     x, y = args[:center]
     r = args[:radius]
@@ -129,6 +141,19 @@ class C64::ScaledScreen < Rubygame::Screen
       fill_circle(x, y, r, args[:fill])
     else
       draw_circle(x, y, r, args[:color])
+    end
+  end
+
+  def arc(args)
+    x, y = args[:center]
+    a, b = args[:angles]
+    r = args[:radius]
+    x -= r
+    y -= r
+    if args[:fill]
+      fill_arc(x, y, r, a, b, args[:fill])
+    else
+      draw_arc(x, y, r, a, b, args[:color])
     end
   end
 
