@@ -12,11 +12,19 @@ class Rake::Task
     prerequisites.join ' '
   end
 
+  def shell(command)
+    puts "#{command}" if Rake.verbose
+    output = %x(#{command})
+    $?.success? or
+      raise "Shell command failed: #{$!}\nCommand: #{command}\nOutput: #{output}"
+    output
+  end
+
   def on_change(&block)
     # Depend on input and task file
     deps = input + [caller[0].split(':').first]
     if dependencies_changed?(deps, output)
-      puts "Performing task :#{name}" if Rake.verbose
+      puts "[Performing task '#{name}']" if Rake.verbose
       block.call(self)
     end
   end
@@ -109,6 +117,6 @@ task :clean do
 end
 
 # Set default task - run program
-if File.exists?("#{PROJECT}.s")
-  task :default => :run
-end
+#if File.exists?("#{PROJECT}.s")
+#  task :default => :run
+#end
