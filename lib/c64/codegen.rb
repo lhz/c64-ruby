@@ -1,4 +1,3 @@
-
 class C64::Codegen
 
   attr_reader :size, :cycles
@@ -55,6 +54,23 @@ class C64::Codegen
     end
   end
 
+  # Very simple assembly into bytes.
+  # Supports only hard coded numbers/addresses as values.
+  def assemble
+    code = []
+    @lines.each do |line|
+      case line[0]
+      when :code
+        mnemonic, mode, value, comment = line[1..4]
+        size = mode_size(mode)
+        code << opcode(mnemonic, mode).value
+        code << value % 256 if size > 1
+        code << value / 256 if size > 2
+      end
+    end
+    code
+  end
+
   def code_string(opcode, value)
     m = opcode.mnemonic.downcase
     case opcode.mode
@@ -71,6 +87,14 @@ class C64::Codegen
     when :rel; '%s %s'        % [m, value]
     when :acc; '%s'           % m
     when :imp; '%s'           % m
+    end
+  end
+
+  def mode_size(mode)
+    case mode
+    when :acc, :imp then 1
+    when :abs, :abx, :aby, :ind then 3
+    else 2
     end
   end
 
