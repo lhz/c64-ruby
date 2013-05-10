@@ -1,4 +1,5 @@
 require 'c64'
+require 'rake'
 
 $:.unshift('./lib')
 
@@ -13,7 +14,7 @@ class Rake::Task
 
   def on_change(&block)
     # Depend on input and task file
-    deps = input << caller[0].split(':').first
+    deps = input + [caller[0].split(':').first]
     if dependencies_changed?(deps, output)
       puts "Performing task :#{name}" if Rake.verbose
       block.call(self)
