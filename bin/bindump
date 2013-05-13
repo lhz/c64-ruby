@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+filename = ARGV[0] or
+  raise "Usage: #{File.basename $0} <filename> [bytes-per-line]"
+
+bytes_per_line = (ARGV[1] || 32).to_i
+
+data = File.read(filename).bytes.to_a
+
+address = data.shift + 256 * data.shift
+
+data.each_slice(bytes_per_line) do |bytes|
+  print "%04X:" % [address]
+  puts (" %02X" * bytes.size) % bytes
+  address += bytes.size
+end
+
+#puts "Length: $%04X (%d) bytes." % [data.size, data.size]

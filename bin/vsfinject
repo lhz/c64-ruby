@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+# Add hex instance method to Fixnum class
+class Fixnum; def hex(digits = 4); sprintf "$%0#{digits}x", self; end; end
+
+# Read snapshot file into byte array
+snapshot = $stdin.read.bytes.to_a
+snapshot[0,19].map{|b|b.chr}.join("") == "VICE Snapshot File\032" or
+  raise "Not a VICE snapshot on standard input."
+
+# Determine offset of C64 memory dump inside the snapshot
+c64mem_offset = snapshot.pack('C*').index('C64MEM') + 26
+$stderr.puts "C64 RAM starts at offset #{c64mem_offset.hex}."
+
+# Other arguments - object files to inject
+raise "No object files given!" if ARGV.empty?
+
+# Process each object file
+ARGV.each do |of|
+  # Read object data into byte array
+  object_data = File.read(of).bytes.to_a
+  # First two bytes form load address
+  address = object_data[0] + 256 * object_data[1]
+  # Length of data to be injected
+  length = object_data.size - 2
+  # Make sure we're not injecting outside valid memory area
+  raise "Data from file '#{of}' is too large to fit into memory!" if address + length > 65536
+  # Log output
+  $stderr.puts "Copying to #{address.hex}-#{(address+length-1).hex} from file '#{of}'."
+  # Inject object data into snapshot at appropriate offset
+  snapshot[c64mem_offset + address, length] = object_data[2..-1]
+end
+
+# Write snapshot data back to file
+$stderr.puts "Writing modified snapshot to standard output."
+$stdout.binmode
+$stdout.write snapshot.pack('C*')
