@@ -18,6 +18,15 @@ class Point
     @x = x
     @y = y
   end
+  def inspect
+    "(#{@x},#{@y})"
+  end
+  def eql?(other)
+    @x == other.x && @y == other.y
+  end
+  def hash
+    [@x, @y].hash
+  end
 end
 
 
