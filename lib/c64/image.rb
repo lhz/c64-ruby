@@ -6,6 +6,7 @@ module C64
   class Image
 
     attr_reader :bitmap, :colmap, :screen
+    attr_writer :debug
 
     # Read image/frames from given filename
     def initialize(filename)
