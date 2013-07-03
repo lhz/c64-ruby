@@ -150,7 +150,7 @@ module C64
 
     # Extract byte value of multicolor pixels
     def byte_multi(x, y, clist)
-      @pixels[y, x..(x+3)].each_with_object([0, 64]) { |c, o|
+      pixels[y, x..(x+3)].each_with_object([0, 64]) { |c, o|
         o[0] += o[1] * lookup_color(c, clist)
         o[1] >>= 2
       }[0]
@@ -160,7 +160,7 @@ module C64
     def byte_hires(x, y, color)
       # puts "C64::Image#byte_hires: x=#{x}, y=#{y}, color=#{color}"
       # puts "  pixels: #{@pixels[y][x, 8].inspect}"
-      @pixels[y, x..(x+7)].each_with_object([0, 128]) { |c, o|
+      pixels[y, x..(x+7)].each_with_object([0, 128]) { |c, o|
         o[0] += o[1] if c == color
         o[1] >>= 1
       }[0]
