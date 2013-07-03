@@ -16,8 +16,8 @@ module C64
       ampl = ampl - 0.001 # Avoid rounding anomaly at min/max
       to_i = true if to_i.nil?
       (0...samples).map do |n|
-        theta = (start.to_f + (n.to_f/samples.to_f) * length.to_f) * Math::PI
-        value = base + ampl * Math.sin(theta)
+        theta = (start.to_f + (n.to_f/samples.to_f) * length.to_f) * ::Math::PI
+        value = base + ampl * ::Math.sin(theta)
         to_i ? value.to_i : value
       end
     end
