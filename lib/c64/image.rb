@@ -138,6 +138,13 @@ module C64
       end
     end
 
+    def sprite_multi(x, y, clist, w = 24, h = 21)
+      # puts "sprite_multi: x=#{x}, y=#{y}"
+      Matrix.build(21, 3).flat_map do |r, c|
+        byte_multi x + 4 * c, y + r, clist
+      end << 0
+    end
+
     # Extract char (8 byte rows) from multicolor pixels
     def char_multi(x, y, clist)
       (0..7).map {|r| byte_multi(x, y + r, clist) }
@@ -150,6 +157,7 @@ module C64
 
     # Extract byte value of multicolor pixels
     def byte_multi(x, y, clist)
+      # puts "byte_multi: x=#{x}, y=#{y}"
       pixels[y, x..(x+3)].each_with_object([0, 64]) { |c, o|
         o[0] += o[1] * lookup_color(c, clist)
         o[1] >>= 2
