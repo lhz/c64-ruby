@@ -177,9 +177,9 @@ module C64
     def byte_multi(x, y, clist)
       debug __method__, {x: x, y: y, clist: clist}
       colors = [1, 0, 2].map {|i| clist[i] }
-      [x, x + 2, x + 4, x + 6].map {|xx|
+      4.times.map { |n|
         # puts "XXX: byte_multi: pixel y=#{y}, x=#{xx}"
-        pixels[y, xx]
+        pixels[y, x + n * pixel_width]
       }.each_with_object([0, 64]) { |c, o|
         o[0] += o[1] * lookup_color(c, colors)
         o[1] >>= 2
