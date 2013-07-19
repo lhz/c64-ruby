@@ -11,6 +11,7 @@ module C64
     # Read image/frames from given filename
     def initialize(filename)
       @png = ChunkyPNG::Image.from_file(filename)
+      @debug = [:double_pixels_detected?]
     end
 
     # Width of image in pixels
@@ -87,16 +88,20 @@ module C64
 
     def double_pixels_detected?(options = {})
       if options[:fast]
-        [width - 1, height].min.times.all? { |i|
-          self[i, i] == self[i, i + 1]
+        double = [width / 2, height].min.times.all? { |i|
+          # self[i, i] == self[i, i + 1]
+          @png[i * 2, i] = @png[i * 2 + 1, i]
         }
       else
-        height.times.all? { |y|
+        double = height.times.all? { |y|
           0.step(width - 1, 2).all? { |x|
-            self[x, y] == self[x + 1, y]
+            # self[x, y] == self[x + 1, y]
+            @png[x, y] == @png[x + 1, y]
           }
         }
       end
+      puts "Pixel width detected to be #{double ? 2 : 1}."
+      double
     end
 
     # Rectangle surrounding the complete image
@@ -116,6 +121,7 @@ module C64
     # Find a color inside a list of (lists of) colors
     # Return index + 1 or 0 if not found
     def lookup_color(c, clist)
+      debug(:lookup_color, {c: c, clist: clist})
       clist.each_with_index do |ci, i|
         return (i + 1) if ci == c || (ci.is_a?(Array) && ci.include?(c))
       end
@@ -138,10 +144,22 @@ module C64
       end
     end
 
-    def sprite_multi(x, y, clist, w = 24, h = 21)
-      # puts "sprite_multi: x=#{x}, y=#{y}"
+    # Extract a grid of sprites
+    def sprite_grid(args)
+      args = {x0: 0, y0: 0, dx: 24, dy: 21}.merge(args)
+      Matrix.build(args[:rows], args[:columns]).flat_map do |r, c|
+        x, y = args[:x0] + c * args[:dx], args[:y0] + r * args[:dy]
+        sprite x: x, y: y, color: args[:color]
+      end
+    end
+
+    # Extract a sprite
+    def sprite(args)
+      args = {x: 0, y: 0, color: 1, w: 24, h: 21}.merge(args)
+      debug __method__, args
       Matrix.build(21, 3).flat_map do |r, c|
-        byte_multi x + 4 * c, y + r, clist
+        method = (args[:color].is_a?(Array) ? :byte_multi : :byte_hires)
+        send method, args[:x] + 8 * c, args[:y] + r, args[:color]
       end << 0
     end
 
@@ -155,16 +173,20 @@ module C64
       (0..7).map {|r| byte_hires(x, y + r, c) }
     end
 
-    # Extract byte value of multicolor pixels
+    # Extract byte value of 4 multicolor pixels
     def byte_multi(x, y, clist)
-      # puts "byte_multi: x=#{x}, y=#{y}"
-      pixels[y, x..(x+3)].each_with_object([0, 64]) { |c, o|
-        o[0] += o[1] * lookup_color(c, clist)
+      debug __method__, {x: x, y: y, clist: clist}
+      colors = [1, 0, 2].map {|i| clist[i] }
+      [x, x + 2, x + 4, x + 6].map {|xx|
+        # puts "XXX: byte_multi: pixel y=#{y}, x=#{xx}"
+        pixels[y, xx]
+      }.each_with_object([0, 64]) { |c, o|
+        o[0] += o[1] * lookup_color(c, colors)
         o[1] >>= 2
       }[0]
     end
 
-    # Extract byte value of singlecolor pixels
+    # Extract byte value of 8 hires pixels
     def byte_hires(x, y, color)
       # puts "C64::Image#byte_hires: x=#{x}, y=#{y}, color=#{color}"
       # puts "  pixels: #{@pixels[y][x, 8].inspect}"
@@ -219,23 +241,23 @@ module C64
       Hash[16.times.map {|c| [c, pixarr.count(c)] }]
     end
 
-    # Extract a set of sprites
-    def sprites(x, y, cols, rows, clist)
-      Matrix.build(rows, cols) { |r, c|
-        to_sprite :x => x + c * 24, :y => y + r * 21, :w => 24, :h => 21, :color => clist
-      }.to_a.flatten
-    end
+    # # Extract a set of sprites
+    # def sprites(x, y, cols, rows, clist)
+    #   Matrix.build(rows, cols) { |r, c|
+    #     to_sprite :x => x + c * 24, :y => y + r * 21, :w => 24, :h => 21, :color => clist
+    #   }.to_a.flatten
+    # end
 
-    # Extract sprite data
-    def sprite(opt)
-      opt[:w] ||= (double_pixels? ? 48 : 24)
-      opt[:h] ||= 21
-      if opt[:color].is_a?(Array)
-        sprite_mc(opt)
-      else
-        sprite_sc(opt)
-      end
-    end
+    # # Extract sprite data
+    # def sprite(opt)
+    #   opt[:w] ||= (double_pixels? ? 48 : 24)
+    #   opt[:h] ||= 21
+    #   if opt[:color].is_a?(Array)
+    #     sprite_mc(opt)
+    #   else
+    #     sprite_sc(opt)
+    #   end
+    # end
 
     # Extract sprite data for single color sprite
     def sprite_sc(opt)
@@ -527,6 +549,12 @@ module C64
       }.each_with_object(Hash.new() { 0 }) {|c, h|
         h[c] += 1
       }.sort_by {|k, v| -v}.map(&:first)
+    end
+
+    def debug(method, args)
+      if @debug.include?(method)
+        puts "C64::Image#debug: #{method} #{args.inspect}"
+      end
     end
 
   end
