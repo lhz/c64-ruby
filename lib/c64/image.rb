@@ -188,8 +188,7 @@ module C64
 
     # Extract byte value of 8 hires pixels
     def byte_hires(x, y, color)
-      # puts "C64::Image#byte_hires: x=#{x}, y=#{y}, color=#{color}"
-      # puts "  pixels: #{@pixels[y][x, 8].inspect}"
+      debug __method__, {x: x, y: y, color: color}
       pixels[y, x..(x+7)].each_with_object([0, 128]) { |c, o|
         o[0] += o[1] if c == color
         o[1] >>= 1
