@@ -61,20 +61,26 @@ if !(defined? SHARED)
     raise "Unable to locate directory containing shared code!"
 end
 
+LINKABLE = ENV['LINKABLE']
+
 UNCOMPILED_PRG = "#{PROJECT}-uncompiled.prg"
 COMPILED_PRG = "#{PROJECT}.prg"
+MERGED_PRG = "#{PROJECT}-merged.prg"
+
+STARTUP = (LINKABLE ? 'startup-nobasic' : 'startup')
 
 # Load .rake files inside lib/tasks
 Dir.glob('lib/tasks/**/*.rake').each {|rake_file| load(rake_file) }
 
-# Assemble startup file
-rule 'startup.o' => [File.join(SHARED, 'startup.s')] do |t|
+# Assemble startup files
+rule "#{STARTUP}.o" => [File.join(SHARED, "#{STARTUP}.s")] do |t|
   sh "ca65 -U -g -l -o #{t.name} #{t.source}"
 end
 
 # Assemble source files into object files
 rule '.o' => ['.s'] do |t|
-  sh "ca65 -U -g -l -o #{t.name} #{t.source}"
+  opts = (LINKABLE ? '-D LINKABLE=1' : '')
+  sh "ca65 -U -g -l #{opts} -o #{t.name} #{t.source}"
 end
 
 # Subtasks for generation of binaries through scripts
@@ -83,7 +89,7 @@ task :binaries
 
 # Link object files into uncompiled program
 desc "Link object files into uncompiled program, binaries not included."
-task :program_uncompiled => ["startup.o", "#{PROJECT}.o"] do |t|
+task :program_uncompiled => ["#{STARTUP}.o", "#{PROJECT}.o"] do |t|
   config_file = File.join(SHARED, 'linker.cfg')
   labels_file = '/tmp/x64-labels.lab'
   if t.dependencies_changed?(t.prerequisites, [UNCOMPILED_PRG])
@@ -104,10 +110,21 @@ task :program_compiled => [:program_uncompiled, :binaries] do |t|
   end
 end
 
+# Join executable and binaries into a single program
+desc "Join executable and binaries"
+task :program_merged => [:program_uncompiled, :binaries] do |t|
+  binaries = Rake::Task[:binaries].prerequisites.map {|tn|
+    Rake::Task[tn].output
+  }.flatten.compact
+  if t.dependencies_changed?([UNCOMPILED_PRG] + binaries, [COMPILED_PRG])
+    sh "prgmerge #{UNCOMPILED_PRG} #{binaries.join(' ')} > #{MERGED_PRG}"
+  end
+end
+
 # Run program in emulator
 desc "Run compiled program in emulator."
-task :run => :program_compiled do |t|
-  sh "x64 #{COMPILED_PRG} >/dev/null"
+task :run => :program_merged do |t|
+  sh "x64 -autostartprgmode 1 #{MERGED_PRG} >/dev/null"
 end
 
 # Clean up
