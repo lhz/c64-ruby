@@ -221,6 +221,7 @@ module C64
         pixels[8 * row + y, 8 * column + pixel_width * x]
       end
       cols = (most_used_colors(cpix, bcol) + [bcol] * 3).first(3).sort
+      debug __method__, {column: column, row: row, bcol: bcol, cols: cols.inspect, cpix: cpix.inspect }
       bytes = 8.times.map do |y|
         4.times.map do |x|
           mask = 2 ** (6 - x * 2)
