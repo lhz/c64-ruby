@@ -63,6 +63,8 @@ end
 
 LINKABLE = ENV['LINKABLE']
 
+LINKER_CFG = File.exists?('linker.cfg') ? 'linker.cfg' : File.join(SHARED, 'linker.cfg')
+
 UNCOMPILED_PRG = "#{PROJECT}-uncompiled.prg"
 COMPILED_PRG = "#{PROJECT}.prg"
 MERGED_PRG = "#{PROJECT}-merged.prg"
@@ -90,10 +92,9 @@ task :binaries
 # Link object files into uncompiled program
 desc "Link object files into uncompiled program, binaries not included."
 task :program_uncompiled => ["#{STARTUP}.o", "#{PROJECT}.o"] do |t|
-  config_file = File.join(SHARED, 'linker.cfg')
   labels_file = '/tmp/x64-labels.lab'
   if t.dependencies_changed?(t.prerequisites, [UNCOMPILED_PRG])
-    sh "ld65 -m linker.map -C #{config_file} -Ln #{labels_file}" <<
+    sh "ld65 -m linker.map -C #{LINKER_CFG} -Ln #{labels_file}" <<
       " -o #{UNCOMPILED_PRG} #{t.plist}"
   end
 end
