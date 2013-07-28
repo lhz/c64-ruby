@@ -3,41 +3,34 @@
 # Merge several C64 object files into a single file suitable for
 # packing with for example lzwvl
 
-# Add hex instance method to Fixnum class
-class Fixnum; def hex(digits = 4); sprintf "$%0#{digits}x", self; end; end
+require 'c64/memory'
+
+def log(msg)
+  $stderr.puts(msg)
+end
+
+def hex(number, digits = 4)
+  "$%0#{digits}X" % number
+end
 
 # Object files to inject
 raise "No object files given!" if ARGV.empty?
 
-memory = Array.new(256*256) { 0 }
-
-addr_min = memory.size-1
-addr_max = 0
+memory = C64::Memory.new
 
 # Process each object file
-ARGV.each do |of|
-  # Read object data into byte array
-  object_data = File.read(of).bytes.to_a
-  # First two bytes form load address
-  address = object_data[0] + 256 * object_data[1]
-  # Length of data to be injected
-  length = object_data.size - 2
-  # Make sure we're not injecting outside valid memory area
-  raise "Data from file '#{of}' is too large to fit into memory!" if address + length > 65536
-  # Log output
-  $stderr.puts "Copying to #{address.hex}-#{(address+length-1).hex} from file '#{of}'."
-  # Inject object data into snapshot at appropriate offset
-  memory[address, length] = object_data[2..-1]
-  # Remember lower and upper bounds
-  addr_min = [addr_min, address].min
-  addr_max = [addr_max, address + length].max
+ARGV.each do |filename|
+  memory.inject_file(filename)
 end
 
 # Output address/size
-$stderr.puts "Result file spans range #{addr_min.hex} - #{(addr_max - 1).hex}."
+log "Result file spans range #{hex(memory.min_used)} - #{hex(memory.max_used)}."
+log "Chunks of used memory:"
+memory.chunks.sort_by {|c| c[:from] }.each do |c|
+  log " #{hex(c[:from])} - #{hex(c[:to])}  (#{hex(c[:size])})  #{c[:labels].join ', '}"
+end
 
 # Write snapshot data back to file
-$stderr.puts "Writing result program to standard output."
+log "Writing result program to standard output."
 $stdout.binmode
-$stdout.write [addr_min].pack('S')
-$stdout.write memory[addr_min...addr_max].pack('C*')
+$stdout.write memory.to_prg
