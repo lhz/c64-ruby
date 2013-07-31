@@ -220,7 +220,8 @@ module C64
       cpix = Matrix.build(8, 4).flat_map do |y, x|
         pixels[8 * row + y, 8 * column + pixel_width * x]
       end
-      cols = (most_used_colors(cpix, bcol) + [bcol] * 3).first(3).sort
+      # cols = (most_used_colors(cpix, bcol) + [bcol] * 3).first(3).sort
+      cols = (most_used_colors(cpix, bcol).sort + [bcol] * 3).first(3)
       debug __method__, {column: column, row: row, bcol: bcol, cols: cols.inspect, cpix: cpix.inspect }
       bytes = 8.times.map do |y|
         4.times.map do |x|
@@ -229,7 +230,7 @@ module C64
           if c != bcol && !cols.include?(c)
             c = nearest_color_in_set(c, cols + [bcol])
           end
-          mask * ((cols.index(c) || -1) + 1)
+          c == bcol ? 0 : mask * ((cols.index(c) || -1) + 1)
         end.reduce(:+)
       end
       [cols[0] * 16 + cols[1], cols[2], bytes]
