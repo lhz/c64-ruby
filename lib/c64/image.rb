@@ -216,12 +216,15 @@ module C64
       bitmap + screen + colmap + [bcol]
     end
 
-    def cell_multi(column, row, bcol = 0)
+    def cell_multi(column, row, bcol = 0, sort_first = false)
       cpix = Matrix.build(8, 4).flat_map do |y, x|
         pixels[8 * row + y, 8 * column + pixel_width * x]
       end
-      # cols = (most_used_colors(cpix, bcol) + [bcol] * 3).first(3).sort
-      cols = (most_used_colors(cpix, bcol).sort + [bcol] * 3).first(3)
+      if sort_first
+        cols = (most_used_colors(cpix, bcol).sort + [bcol] * 3).first(3)
+      else
+        cols = (most_used_colors(cpix, bcol) + [bcol] * 3).first(3).sort
+      end
       debug __method__, {column: column, row: row, bcol: bcol, cols: cols.inspect, cpix: cpix.inspect }
       bytes = 8.times.map do |y|
         4.times.map do |x|
