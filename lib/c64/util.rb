@@ -30,6 +30,15 @@ module C64
       end
     end
 
+    # Dump an array of bytes as an assembly table
+    def self.write_tables(filename, &block)
+      File.open(filename, 'w') do |file|
+        util = new
+        util.output = file
+        block.call(util)
+      end
+    end
+
     def initialize
       @output = $stdout
       @indent = "\t"
