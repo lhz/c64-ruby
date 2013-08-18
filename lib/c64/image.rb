@@ -239,6 +239,27 @@ module C64
       [cols[0] * 16 + cols[1], cols[2], bytes]
     end
 
+    def cell_hires(column, row, sort_first = false)
+      cpix = Matrix.build(8, 8).flat_map do |y, x|
+        pixels[8 * row + y, 8 * column + pixel_width * x]
+      end
+      if sort_first
+        cols = (most_used_colors(cpix, nil).sort + [0] * 2).first(2)
+      else
+        cols = (most_used_colors(cpix, nil) + [0] * 3).first(2).sort
+      end
+      bytes = 8.times.map do |y|
+        8.times.map do |x|
+          mask = 2 ** (7 - x)
+          c = cpix[y * 8 + x]
+          c = nearest_color_in_set(c, cols) if !cols.include?(c)
+          mask * (cols.index(c) || 0)
+        end.reduce(:+)
+      end
+      debug __method__, {column: column, row: row, cols: cols.inspect, cpix: cpix.inspect, bytes: bytes.inspect }
+      [cols[1] * 16 + cols[0], bytes]
+    end
+
     # Calculate histogram data of pixel color distribution
     def histogram
       pixarr = @pixels.to_a.flatten
