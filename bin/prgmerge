@@ -3,6 +3,7 @@
 # Merge several C64 object files into a single file suitable for
 # packing with for example lzwvl
 
+require 'c64'
 require 'c64/memory'
 
 def log(msg)
