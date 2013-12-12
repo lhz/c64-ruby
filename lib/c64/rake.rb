@@ -14,16 +14,16 @@ class Rake::Task
 
   def shell(command)
     puts "#{command}" if Rake.verbose
-    output = %x(#{command})
+    result = %x(#{command})
     $?.success? or
-      raise "Shell command failed: #{$!}\nCommand: #{command}\nOutput: #{output}"
-    output
+      raise "Shell command failed: #{$!}\nCommand: #{command}\nOutput: #{result}"
+    result
   end
 
   def on_change(&block)
     # Depend on input and task file
-    deps = input + [caller[0].split(':').first]
-    if dependencies_changed?(deps, output)
+    deps = Array(input) + [caller[0].split(':').first]
+    if dependencies_changed?(deps, Array(output))
       puts "[Performing task '#{name}']" if Rake.verbose
       block.call(self)
     end
@@ -103,7 +103,7 @@ end
 desc "Created compiled program, including binaries."
 task :program_compiled => [:program_uncompiled, :binaries] do |t|
   binaries = Rake::Task[:binaries].prerequisites.map {|tn|
-    Rake::Task[tn].output
+    Array(Rake::Task[tn].output)
   }.flatten.compact
   if t.dependencies_changed?([UNCOMPILED_PRG] + binaries, [COMPILED_PRG])
     sh "exomizer sfx sys -q -n -m1024 -p1 -o #{COMPILED_PRG}" <<
@@ -115,7 +115,7 @@ end
 desc "Join executable and binaries"
 task :program_merged => [:program_uncompiled, :binaries] do |t|
   binaries = Rake::Task[:binaries].prerequisites.map {|tn|
-    Rake::Task[tn].output
+    Array(Rake::Task[tn].output)
   }.flatten.compact
   if t.dependencies_changed?([UNCOMPILED_PRG] + binaries, [COMPILED_PRG])
     sh "prgmerge #{UNCOMPILED_PRG} #{binaries.join(' ')} > #{MERGED_PRG}"
