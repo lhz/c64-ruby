@@ -96,8 +96,8 @@ desc "Link object files into uncompiled program, binaries not included."
 task :program_uncompiled => ["#{STARTUP}.o", "#{PROJECT}.o"] do |t|
   labels_file = '/tmp/x64-labels.lab'
   if t.dependencies_changed?(t.prerequisites, [UNCOMPILED_PRG])
-    sh "ld65 -m linker.map -C #{LINKER_CFG} -Ln #{labels_file}" <<
-      " -o #{UNCOMPILED_PRG} #{t.plist}"
+    sh "ld65 -o #{UNCOMPILED_PRG} -m linker.map -C #{LINKER_CFG} " <<
+      "-Ln #{labels_file} #{t.plist}"
   end
 end
 
