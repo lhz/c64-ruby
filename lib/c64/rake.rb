@@ -69,6 +69,8 @@ UNCOMPILED_PRG = "#{PROJECT}-uncompiled.prg"
 COMPILED_PRG = "#{PROJECT}.prg"
 MERGED_PRG = "#{PROJECT}-merged.prg"
 
+LISTING_FILE = "#{PROJECT}.lst"
+
 STARTUP = (LINKABLE ? 'startup-nobasic' : 'startup')
 
 # Load .rake files inside lib/tasks
@@ -76,13 +78,13 @@ Dir.glob('lib/tasks/**/*.rake').each {|rake_file| load(rake_file) }
 
 # Assemble startup files
 rule "#{STARTUP}.o" => [File.join(SHARED, "#{STARTUP}.s")] do |t|
-  sh "ca65 -U -g -l -o #{t.name} #{t.source}"
+  sh "ca65 -U -g -l #{LISTING_FILE} -o #{t.name} #{t.source}"
 end
 
 # Assemble source files into object files
 rule '.o' => ['.s'] do |t|
   opts = (LINKABLE ? '-D LINKABLE=1' : '')
-  sh "ca65 -U -g -l #{opts} -o #{t.name} #{t.source}"
+  sh "ca65 -U -g -l #{LISTING_FILE} #{opts} -o #{t.name} #{t.source}"
 end
 
 # Subtasks for generation of binaries through scripts
