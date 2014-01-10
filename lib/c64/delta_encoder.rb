@@ -1,7 +1,7 @@
 module C64
   class DeltaEncoder
 
-    attr_reader :num_objects
+    attr_reader :num_objects, :steps, :deltas
 
     def initialize(num_objects, num_traits, options = {})
       @num_objects = num_objects
