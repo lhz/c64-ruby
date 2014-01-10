@@ -63,6 +63,9 @@ module C64
           def rgb(palette = :pepto)
             C64::Color.to_rgb(self, palette)
           end
+          def rgbs(palette = :pepto)
+            "#%06X" % C64::Color.to_rgb(self, palette)
+          end
         end
       end
     end
