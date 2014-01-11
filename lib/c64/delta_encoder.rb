@@ -7,6 +7,7 @@ module C64
       @num_objects = num_objects
       @num_traits  = num_traits
       @ranges = options[:ranges] || [(-7..7)] * num_traits
+      @modulo = options[:modulo]
       @steps  = Array.new(num_objects) { [] }
       @deltas = Hash.new { 0 }
     end
@@ -14,11 +15,23 @@ module C64
     def record_step(index, state)
       step = {s: state}
       if prev = @steps[index].last
-        step[:d] = prev[:s].map.with_index {|value, i| state[i] - value}
+        step[:d] = prev[:s].map.with_index do |value, i|
+          delta_with_modulo value, state[i], @modulo[i]
+        end
         register_delta step[:d]
       end
-      puts "RECORDED: #{step.inspect}"
+      # puts "RECORDED: [#{index}] #{step.inspect}"
       @steps[index] << step
+    end
+
+    def delta_with_modulo(from, to, modulo)
+      delta = to - from
+      if modulo && delta > modulo / 2
+        delta -= modulo
+      elsif modulo && delta < -modulo / 2
+        delta += modulo
+      end
+      delta
     end
 
     def step_count
@@ -75,20 +88,25 @@ module C64
         # No movement
         if deltas.all?(&:zero?)
           num_frames = steps[index][frame..-1].index {|s| s[:d].any?(&:nonzero?) }
-          script_sleep num_frames
-          frame += num_frames
+          if num_frames
+            script_sleep num_frames
+            frame += num_frames
+          else
+            frame = steps[index].size
+          end
         elsif delta_index.key?(deltas)
           script_delta delta_index[deltas]
           frame += 1
         else
-          puts "Warning: Not in delta index: #{deltas.inspect}"
+          # puts "Warning: Not in delta index: #{deltas.inspect}"
           script_state steps[index][frame][:s]
           frame += 1
         end
       end
 
       script_end
-      script_annotate(index)
+
+      # script_annotate(index)
 
       script
     end
