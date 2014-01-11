@@ -206,6 +206,17 @@ module C64
       end
     end
 
+    def write_bitmap_hires(base_path, addr)
+      hires = to_hires
+      range = { :bitmap => 0..7999, :screen => 8000..8999 }
+      [:bitmap, :screen].each do |part|
+        File.open("#{base_path}-#{part}.bin", 'wb') do |bm|
+          bm.write [addr[part]].pack('S')
+          bm.write hires[range[part]].pack('C*')
+        end
+      end
+    end
+
     def to_koala(bcol)
       cells = Matrix.build(25, 40).map do |row, column|
         cell_multi(column, row, bcol)
@@ -214,6 +225,15 @@ module C64
       colmap = cells.map {|c| c[1] }
       bitmap = cells.flat_map {|c| c[2] }
       bitmap + screen + colmap + [bcol]
+    end
+
+    def to_hires
+      cells = Matrix.build(25, 40).map do |row, column|
+        cell_hires(column, row)
+      end
+      screen = cells.map {|c| c[0] }
+      bitmap = cells.flat_map {|c| c[1] }
+      bitmap + screen
     end
 
     def cell_multi(column, row, bcol = 0, sort_first = false)
