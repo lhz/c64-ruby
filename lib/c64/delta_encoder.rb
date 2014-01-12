@@ -64,7 +64,17 @@ module C64
         compile_object i
       end
       puts "SCRIPT SIZES: #{scripts.map(&:size).join(', ')}"
-      C64::Util.write_bytes filename, scripts.flatten, address
+
+      C64::Util.write_bytes filename, scripts.flatten + delta_array.transpose.flatten, address
+
+      addresses = scripts.each_with_object([address]) do |scr, addr|
+        addr << addr[-1] + scr.size
+      end
+      @num_traits.times do
+        addresses << addresses[-1] + delta_array.size
+      end
+      puts "SCRIPT ADDR: ", addresses[0, num_objects].map  {|a| "$%04X" % a }.join(", ")
+      puts "DELTAB ADDR: ", addresses[num_objects..-1].map {|a| "$%04X" % a }.join(", ")
     end
 
     def compile_object(index)
