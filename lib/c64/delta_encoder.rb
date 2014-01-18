@@ -63,7 +63,7 @@ module C64
       scripts = num_objects.times.map do |i|
         compile_object i
       end
-      puts "SCRIPT SIZES: #{scripts.map(&:size).join(', ')}"
+      # puts "SCRIPT SIZES: #{scripts.map(&:size).join(', ')}"
 
       addr_offset = 2 * (num_objects + @num_traits)
       addresses = scripts.each_with_object([address + addr_offset]) do |scr, addr|
@@ -73,9 +73,14 @@ module C64
         addresses << addresses[-1] + delta_array.size
       end
 
-      C64::Util.write_bytes filename,
-        addresses.pack('S*').bytes + scripts.flatten + delta_array.transpose.flatten,
-        address
+      out_header = addresses.pack('S*').bytes
+      out_script = scripts.flatten
+      out_deltas = delta_array.transpose.flatten
+      out_bytes  = out_header + out_script + out_deltas
+
+      puts "SIZE: #{out_header.size} header, #{out_script.size} scripts, #{out_deltas.size} deltas, #{out_bytes.size} total"
+
+      C64::Util.write_bytes filename, out_bytes, address
     end
 
     def compile_object(index)
