@@ -57,24 +57,25 @@ module C64
 
       puts "STEPS: #{step_count}"
       puts "DELTA: #{delta_array.size}"
-      puts "ARRAY: #{delta_array.inspect}"
-      puts "INDEX: #{delta_index.inspect}"
+      # puts "ARRAY: #{delta_array.inspect}"
+      # puts "INDEX: #{delta_index.inspect}"
 
       scripts = num_objects.times.map do |i|
         compile_object i
       end
       puts "SCRIPT SIZES: #{scripts.map(&:size).join(', ')}"
 
-      C64::Util.write_bytes filename, scripts.flatten + delta_array.transpose.flatten, address
-
-      addresses = scripts.each_with_object([address]) do |scr, addr|
+      addr_offset = 2 * (num_objects + @num_traits)
+      addresses = scripts.each_with_object([address + addr_offset]) do |scr, addr|
         addr << addr[-1] + scr.size
       end
-      @num_traits.times do
+      (@num_traits - 1).times do
         addresses << addresses[-1] + delta_array.size
       end
-      puts "SCRIPT ADDR: ", addresses[0, num_objects].map  {|a| "$%04X" % a }.join(", ")
-      puts "DELTAB ADDR: ", addresses[num_objects..-1].map {|a| "$%04X" % a }.join(", ")
+
+      C64::Util.write_bytes filename,
+        addresses.pack('S*').bytes + scripts.flatten + delta_array.transpose.flatten,
+        address
     end
 
     def compile_object(index)
@@ -116,7 +117,7 @@ module C64
 
       script_end
 
-      # script_annotate(index)
+      # script_annotate(index) if index == 0
 
       script
     end
