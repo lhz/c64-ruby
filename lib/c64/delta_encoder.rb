@@ -76,7 +76,7 @@ module C64
       out_header = addresses[0...num_objects].map {|a| a % 256 }
       out_header += addresses[0...num_objects].map {|a| a / 256 }
       out_header += addresses[num_objects..-1].pack('S*').bytes
-      out_header += [scripts.map(&:size).max].pack('S*').bytes
+      out_header += [steps.map(&:size).max].pack('S*').bytes
 
       out_script = scripts.flatten
       out_deltas = delta_array.transpose.flatten
