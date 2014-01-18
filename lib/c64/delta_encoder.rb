@@ -65,7 +65,7 @@ module C64
       end
       # puts "SCRIPT SIZES: #{scripts.map(&:size).join(', ')}"
 
-      addr_offset = 2 * (num_objects + @num_traits)
+      addr_offset = 2 * (num_objects + @num_traits + 1)
       addresses = scripts.each_with_object([address + addr_offset]) do |scr, addr|
         addr << addr[-1] + scr.size
       end
@@ -73,7 +73,11 @@ module C64
         addresses << addresses[-1] + delta_array.size
       end
 
-      out_header = addresses.pack('S*').bytes
+      out_header = addresses[0...num_objects].map {|a| a % 256 }
+      out_header += addresses[0...num_objects].map {|a| a / 256 }
+      out_header += addresses[num_objects..-1].pack('S*').bytes
+      out_header += [scripts.map(&:size).max].pack('S*').bytes
+
       out_script = scripts.flatten
       out_deltas = delta_array.transpose.flatten
       out_bytes  = out_header + out_script + out_deltas
