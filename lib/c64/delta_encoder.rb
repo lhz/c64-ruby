@@ -87,6 +87,105 @@ module C64
       C64::Util.write_bytes filename, out_bytes, address
     end
 
+    # compile_chunked('scripts', [0x5000..0x5FFF, 0x9000..0x9FFF, 0xF800..0xFFC0])
+
+    class Bin
+      attr_accessor :address, :free, :items
+      def initialize(address, free)
+        @address = address
+        @free    = free
+        @items   = []
+      end
+      def add(item)
+        raise "No space remaining!" unless @free >= item[:size]
+        @free -= item[:size]
+        @items << item
+        self
+      end
+      def dump
+        puts "  Address: $%04X, Free: %d" % [address, free]
+        items.each { |item| puts "    #{item.inspect}" }
+      end
+    end
+
+    class BinSet
+      attr_reader :bins
+      def initialize(chunks)
+        @bins = chunks.map { |c| Bin.new(c.first, c.size) }
+      end
+      def first
+        bins.first
+      end
+      def first_free(size)
+        bins.index {|b| b.free >= size} or
+          raise "No bin found with #{size} free space remaining:\n#{dump}"
+      end
+      def add(item)
+        index = first_free(item[:size])
+        bins[index].add item
+      end
+      def dump
+        puts "BinSet:"
+        bins.each {|bin| bin.dump }
+      end
+    end
+
+    def compile_chunked(basename = 'scripts', *chunks)
+      prune_deltas
+      index_deltas
+
+      puts "STEPS: #{step_count}"
+      puts "DELTA: #{delta_array.size}"
+
+      scripts = num_objects.times.map do |i|
+        compile_object i
+      end
+
+      header_size = 2 * (num_objects + @num_traits + 1)
+
+      # Pack header, deltas and scripts into chunks
+      bin_set = BinSet.new(chunks)
+      bin_set.add :type => :header, :size => header_size
+      @num_traits.times do |tn|
+        bin_set.add :type => :delta, :index => tn, :size => delta_array.size
+      end
+      descending = scripts.sort_by {|s| -s.size}
+      descending.each_with_index do |script, si|
+        bin_set.add :type => :script, :index => si, :size => script.size
+      end
+
+      bin_set.dump
+
+      addresses = bin_set.bins.map.with_index do |bin, index|
+        address = bin.address
+        bin.items.map do |item|
+          old_address = address
+          address += item[:size]
+          old_address
+        end
+      end.flatten
+
+      puts addresses.map {|a| "$%04X" % a}.join " "
+
+      bin_set.bins.each_with_index do |bin, index|
+        bytes = []
+        bin.items.each do |item|
+          case item[:type]
+          when :header
+            bytes += addresses[@num_traits+1..@num_traits+num_objects].map {|a| a % 256 }
+            bytes += addresses[@num_traits+1..@num_traits+num_objects].map {|a| a / 256 }
+            bytes += addresses[1..@num_traits].pack('S*').bytes
+            bytes += [steps.map(&:size).max].pack('S*').bytes
+          when :delta
+            bytes += delta_array.transpose[item[:index]]
+          when :script
+            bytes += scripts[item[:index]]
+          end
+        end
+        C64::Util.write_bytes "#{basename}-#{index}.bin", bytes, bin.address
+      end
+    end
+
     def compile_object(index)
       script_start
 
