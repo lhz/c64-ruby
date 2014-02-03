@@ -127,7 +127,7 @@ end
 # Run program in emulator
 desc "Run compiled program in emulator."
 task :run => :program_merged do |t|
-  sh "x64 -autostartprgmode 1 #{MERGED_PRG} >/dev/null"
+  sh "x64 -autostartprgmode 1 #{ENV['VICEOPTS']} #{MERGED_PRG} >/dev/null"
 end
 
 # Clean up
