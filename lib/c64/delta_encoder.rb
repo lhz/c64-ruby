@@ -179,7 +179,7 @@ module C64
           when :delta
             bytes += delta_array.transpose[item[:index]]
           when :script
-            bytes += scripts[item[:index]]
+            bytes += descending[item[:index]]
           end
         end
         C64::Util.write_bytes "#{basename}-#{index}.bin", bytes, bin.address
