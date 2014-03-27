@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+# Usage: imageconv <source> <target> [bitmap=4000] [screen=6000] [colmap=6400] [bgrcol=0]
+#
+# Convert a graphics image to binary format suitable for
+# direct linking into memory, split in three files (bitmap, screen, colmap)
+
+$:.unshift File.expand_path('../../lib', __FILE__)
+require 'c64'
+require 'c64/image'
+
+source = ARGV[0]
+target = ARGV[1]
+bitmap = Integer(ARGV[2] || 0x4000)
+screen = Integer(ARGV[3] || 0x6000)
+colmap = Integer(ARGV[4] || 0x6400)
+bgrcol = Integer(ARGV[5] || 0)
+
+source && target or
+  raise "Usage: #{$0} <source> <target> [bgrcol] [bitmap] [screen] [colmap] [bgrcol]"
+
+image = C64::Image.new(source)
+image.write_bitmap_multi target, bgrcol, bitmap: bitmap, screen: screen, colmap: colmap
