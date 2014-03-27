@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Usage: imageconv <source> <target> [bitmap=4000] [screen=6000] [colmap=6400] [bgrcol=0]
+# Usage: imageconv <source> <target> [bitmap=0x4000] [screen=0x6000] [colmap=0x6400] [bgrcol=0]
 #
 # Convert a graphics image to binary format suitable for
 # direct linking into memory, split in three files (bitmap, screen, colmap)
