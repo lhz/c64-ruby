@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+# Usage: img2bin.rb <source-file> <target-file> [load-addr]
+#
+# Convert a graphics image to binary format suitable for
+# direct linking into memory. The layout of the target
+# format is as follows:
+#
+# 0000-03E8     Color (to be copied to $D800)
+# 0400-07E8     Screen
+# 0800-2740     Bitmap
+#
+# Default load address is $5800. To be able to use the result
+# image directly as bitmap, the load address should be a valid
+# bitmap memory address ($2000 * n) minus $800.
+
+$:.unshift('../../../ruby/lib')
+require 'c64'
+require 'c64/image'
+
+source_file = ARGV[0]
+target_file = ARGV[1]
+target_addr = ARGV[2] || '5800'
+
+source_file && target_file or
+  raise "Usage: #{$0} <source-file> <target-file> [load-addr]"
+
+image = C64::Image.new(source_file, true)
+image.convert_multicolor_bitmap
+
+File.open(target_file, 'wb') do |tf|
+  tf.write [target_addr.to_i(16)].pack('S')
+  tf.write image.colmap.pack('C*')
+  tf.write ([0]*24).pack('C*')
+  tf.write image.screen.pack('C*')
+  tf.write ([0]*24).pack('C*')
+  tf.write image.bitmap.pack('C*')
+end
