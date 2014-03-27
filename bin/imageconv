@@ -17,7 +17,7 @@ colmap = Integer(ARGV[4] || 0x6400)
 bgrcol = Integer(ARGV[5] || 0)
 
 source && target or
-  raise "Usage: #{$0} <source> <target> [bgrcol] [bitmap] [screen] [colmap] [bgrcol]"
+  fail "Usage: #{$0} <source> <target> [bgrcol] [bitmap] [screen] [colmap] [bgrcol]"
 
 image = C64::Image.new(source)
 image.write_bitmap_multi target, bgrcol, bitmap: bitmap, screen: screen, colmap: colmap
