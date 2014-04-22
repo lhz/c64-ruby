@@ -10,8 +10,8 @@ module C64
       samples = params[:samples] || 256
       start   = params[:start]   || 0.0
       length  = params[:length]  || 2.0
-      ampl    = params[:ampl].to_f || 128.0
-      base    = params[:base].to_f || ampl
+      ampl    = (params[:ampl] || 128).to_f
+      base    = (params[:base] || ampl).to_f
       to_i    = params[:to_i]
       ampl = ampl - 0.001 # Avoid rounding anomaly at min/max
       to_i = true if to_i.nil?
