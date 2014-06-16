@@ -14,6 +14,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = C64::VERSION
 
+  gem.required_ruby_version = '>= 2.0'
+
   gem.add_dependency "chunky_png", "~> 1.2.8"
   gem.add_dependency "rubygame", "~> 2.6.4"
 

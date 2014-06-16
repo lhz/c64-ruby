@@ -3,6 +3,7 @@ require 'c64/color'
 require 'c64/image'
 require 'c64/math'
 require 'c64/util'
+require 'c64/helpers'
 require 'matrix'
 
 module C64
