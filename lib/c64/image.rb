@@ -354,6 +354,7 @@ module C64
     end
 
     def nearest_color_in_set(color, set)
+      debug __method__, { color: color, set: set.inspect }
       lum = [0, 255, 80, 159, 96, 128, 64, 191, 96, 64, 128, 80, 120, 191, 120, 159]
       set.min_by {|c| (lum[c] - lum[color]).abs }
     end
