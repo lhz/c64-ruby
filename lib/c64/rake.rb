@@ -64,6 +64,11 @@ if !(defined? PROJECT)
   PROJECT = File.basename(Dir.pwd)
 end
 
+LINKABLE = ENV['LINKABLE']
+
+CA65_OPTS = ["-U -g -l #{PROJECT}.lst"]
+CA65_OPTS << '-D LINKABLE=1' if LINKABLE
+
 # Locate directory containing shared code
 if !(defined? SHARED)
   path = Dir.pwd
@@ -76,36 +81,36 @@ if !(defined? SHARED)
   end
   defined? SHARED or
     raise "Unable to locate directory containing shared code!"
+  CA65_OPTS << "-I #{SHARED}"
 end
 
-LINKABLE = ENV['LINKABLE']
-
-LINKER_CFG = if File.exists?('linker.cfg')
-               'linker.cfg'
-             else 
-               File.join(SHARED, 'linker.cfg')
-             end
+LINKER_CFG =
+  if File.exists?('linker.cfg')
+    'linker.cfg'
+  else 
+    File.join(SHARED, 'linker.cfg')
+  end
 
 UNCOMPILED_PRG = "#{PROJECT}-uncompiled.prg"
 COMPILED_PRG = "#{PROJECT}.prg"
 MERGED_PRG = "#{PROJECT}-merged.prg"
 
-LISTING_FILE = "#{PROJECT}.lst"
-
 STARTUP = (LINKABLE ? 'startup-nobasic' : 'startup')
 
+# Require source files inside lib
+Dir.glob('lib/**/*.rb').each {|file| require File.expand_path(file) }
+
 # Load .rake files inside lib/tasks
-Dir.glob('lib/tasks/**/*.rake').each {|rake_file| load(rake_file) }
+Dir.glob('lib/tasks/**/*.rake').each {|file| load File.expand_path(rake_file) }
 
 # Assemble startup files
 rule "#{STARTUP}.o" => [File.join(SHARED, "#{STARTUP}.s")] do |t|
-  sh "ca65 -U -g -l #{LISTING_FILE} -o #{t.name} #{t.source}"
+  sh "ca65 #{CA65_OPTS.join(' ')} -o #{t.name} #{t.source}"
 end
 
 # Assemble source files into object files
 rule '.o' => ['.s'] do |t|
-  opts = (LINKABLE ? '-D LINKABLE=1' : '')
-  sh "ca65 -U -g -l #{LISTING_FILE} #{opts} -o #{t.name} #{t.source}"
+  sh "ca65 #{CA65_OPTS.join(' ')} -o #{t.name} #{t.source}"
 end
 
 # Subtasks for generation of binaries through scripts
