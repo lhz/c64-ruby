@@ -8,12 +8,16 @@ class Rake::Task
 
   attr_accessor :input, :output
 
+  def debug(message)
+    puts "[Rake::Task: #{name}] #{message}" if Rake.verbose == true
+  end
+
   def plist
     prerequisites.join ' '
   end
 
   def shell(command)
-    puts "#{command}" if Rake.verbose
+    debug "Running shell command: '#{command}'"
     result = %x(#{command})
     $?.success? or
       raise "Shell command failed: #{$!}\nCommand: #{command}\nOutput: #{result}"
@@ -28,7 +32,7 @@ class Rake::Task
     # Depend on input and task file
     deps = Array(input) + [caller[0].split(':').first]
     if dependencies_changed?(deps, Array(output))
-      puts "[Performing task '#{name}']" if Rake.verbose
+      debug "Performing task."
       block.call(self)
     end
   end
@@ -36,12 +40,21 @@ class Rake::Task
   def dependencies_changed?(sources = prerequisites, targets = [name])
     sources = sources.dup.select {|f| File.exists?(f) }
     targets = targets.dup.select {|f| File.exists?(f) }
-    if sources.empty? || targets.empty?
+    if sources.empty?
+      debug "Source files do not exist."
+      true
+    elsif targets.empty?
+      debug "Target files do not exist."
       true
     else
-      mtime_newest_source = sources.map {|f| File.mtime(f) }.max
-      mtime_oldest_target = targets.map {|f| File.mtime(f) }.min
-      mtime_newest_source > mtime_oldest_target
+      mtime_newest_source = sources.map {|f| [f, File.mtime(f)] }.max_by {|s| s[1]}
+      mtime_oldest_target = targets.map {|f| [f, File.mtime(f)] }.min_by {|t| t[1]}
+      if mtime_newest_source[1] > mtime_oldest_target[1]
+        debug "Source #{mtime_newest_source[0]} changed."
+        true
+      else
+        false
+      end
     end
   end
 end
@@ -67,7 +80,11 @@ end
 
 LINKABLE = ENV['LINKABLE']
 
-LINKER_CFG = File.exists?('linker.cfg') ? 'linker.cfg' : File.join(SHARED, 'linker.cfg')
+LINKER_CFG = if File.exists?('linker.cfg')
+               'linker.cfg'
+             else 
+               File.join(SHARED, 'linker.cfg')
+             end
 
 UNCOMPILED_PRG = "#{PROJECT}-uncompiled.prg"
 COMPILED_PRG = "#{PROJECT}.prg"
@@ -123,7 +140,7 @@ task :program_merged => [:program_uncompiled, :binaries] do |t|
   binaries = Rake::Task[:binaries].prerequisites.map {|tn|
     Array(Rake::Task[tn].output)
   }.flatten.compact
-  if t.dependencies_changed?([UNCOMPILED_PRG] + binaries, [COMPILED_PRG])
+  if t.dependencies_changed?([UNCOMPILED_PRG] + binaries, [MERGED_PRG])
     sh "prgmerge #{UNCOMPILED_PRG} #{binaries.join(' ')} > #{MERGED_PRG}"
   end
 end
@@ -131,7 +148,7 @@ end
 # Run program in emulator
 desc "Run compiled program in emulator."
 task :run => :program_merged do |t|
-  sh "x64 -autostartprgmode 1 #{ENV['VICEOPTS']} #{MERGED_PRG} >/dev/null"
+  sh "x64 -autostartprgmode 1 #{ENV['VICEOPTS']} #{MERGED_PRG} >/dev/null 2>/tmp/x64.log || exit 0"
 end
 
 # Clean up
