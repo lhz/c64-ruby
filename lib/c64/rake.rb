@@ -101,7 +101,7 @@ STARTUP = (LINKABLE ? 'startup-nobasic' : 'startup')
 Dir.glob('lib/**/*.rb').each {|file| require File.expand_path(file) }
 
 # Load .rake files inside lib/tasks
-Dir.glob('lib/tasks/**/*.rake').each {|file| load File.expand_path(rake_file) }
+Dir.glob('lib/tasks/**/*.rake').each {|file| load File.expand_path(file) }
 
 # Assemble startup files
 rule "#{STARTUP}.o" => [File.join(SHARED, "#{STARTUP}.s")] do |t|
