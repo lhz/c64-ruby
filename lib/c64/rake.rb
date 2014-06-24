@@ -12,18 +12,6 @@ class Rake::Task
     puts "[Rake::Task: #{name}] #{message}" if Rake.verbose == true
   end
 
-  def plist
-    prerequisites.join ' '
-  end
-
-  def shell(command)
-    debug "Running shell command: '#{command}'"
-    result = %x(#{command})
-    $?.success? or
-      raise "Shell command failed: #{$!}\nCommand: #{command}\nOutput: #{result}"
-    result
-  end
-
   def on_change(io = nil, &block)
     if io && io.respond_to?(:keys) && io.keys.size == 1
       self.input  = io.keys.first
@@ -42,20 +30,19 @@ class Rake::Task
     targets = targets.dup.select {|f| File.exists?(f) }
     if sources.empty?
       debug "Source files do not exist."
-      true
-    elsif targets.empty?
-      debug "Target files do not exist."
-      true
-    else
-      mtime_newest_source = sources.map {|f| [f, File.mtime(f)] }.max_by {|s| s[1]}
-      mtime_oldest_target = targets.map {|f| [f, File.mtime(f)] }.min_by {|t| t[1]}
-      if mtime_newest_source[1] > mtime_oldest_target[1]
-        debug "Source #{mtime_newest_source[0]} changed."
-        true
-      else
-        false
-      end
+      return true
     end
+    if targets.empty?
+      debug "Target files do not exist."
+      return true
+    end
+    mtime_newest_source = sources.map {|f| [f, File.mtime(f)] }.max_by {|s| s[1]}
+    mtime_oldest_target = targets.map {|f| [f, File.mtime(f)] }.min_by {|t| t[1]}
+    if mtime_newest_source[1] > mtime_oldest_target[1]
+      debug "Source #{mtime_newest_source[0]} changed."
+      return true
+    end
+    false
   end
 end
 
@@ -123,7 +110,7 @@ task :program_uncompiled => ["#{STARTUP}.o", "#{PROJECT}.o"] do |t|
   labels_file = '/tmp/x64-labels.lab'
   if t.dependencies_changed?(t.prerequisites, [UNCOMPILED_PRG])
     sh "ld65 -o #{UNCOMPILED_PRG} -m linker.map -C #{LINKER_CFG} " <<
-      "-Ln #{labels_file} #{t.plist}"
+      "-Ln #{labels_file} #{t.prerequisites.join ' '}"
   end
 end
 
