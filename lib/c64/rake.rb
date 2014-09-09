@@ -79,8 +79,11 @@ LINKER_CFG =
   end
 
 UNCOMPILED_PRG = "#{PROJECT}-uncompiled.prg"
-COMPILED_PRG = "#{PROJECT}.prg"
-MERGED_PRG = "#{PROJECT}-merged.prg"
+COMPILED_PRG   = "#{PROJECT}.prg"
+MERGED_PRG     = "#{PROJECT}-merged.prg"
+VICE_SNAPBASE  = "#{SHARED}/x64sc-snapshot.vsf"
+VICE_SNAPSHOT  = 'snapshot.vsf'
+VICE_LABELS    = 'labels.txt'
 
 STARTUP = (LINKABLE ? 'startup-nobasic' : 'startup')
 
@@ -107,10 +110,9 @@ task :binaries
 # Link object files into uncompiled program
 desc "Link object files into uncompiled program, binaries not included."
 task :program_uncompiled => ["#{STARTUP}.o", "#{PROJECT}.o"] do |t|
-  labels_file = '/tmp/x64-labels.lab'
   if t.dependencies_changed?(t.prerequisites, [UNCOMPILED_PRG])
     sh "ld65 -o #{UNCOMPILED_PRG} -m linker.map -C #{LINKER_CFG} " <<
-      "-Ln #{labels_file} #{t.prerequisites.join ' '}"
+      "-Ln #{VICE_LABELS} #{t.prerequisites.join ' '}"
   end
 end
 
@@ -137,10 +139,29 @@ task :program_merged => [:program_uncompiled, :binaries] do |t|
   end
 end
 
+# Update emulator snapshot
+desc "Update emulator snapshot with executable and binaries"
+task :update_snapshot => [:program_uncompiled, :binaries] do |t|
+  binaries = Rake::Task[:binaries].prerequisites.map {|tn|
+    Array(Rake::Task[tn].output)
+  }.flatten.compact
+  if t.dependencies_changed?([UNCOMPILED_PRG] + binaries, [VICE_SNAPSHOT])
+    sh "vsfinject #{UNCOMPILED_PRG} #{binaries.join(' ')} < #{VICE_SNAPBASE} > #{VICE_SNAPSHOT}"
+  end
+end
+
 # Run program in emulator
 desc "Run compiled program in emulator."
 task :run => :program_merged do |t|
-  sh "x64 -autostartprgmode 1 #{ENV['VICEOPTS']} #{MERGED_PRG} >/tmp/x64.log 2>&1 || exit 0"
+  sh "x64sc -autostartprgmode 1 #{ENV['VICEOPTS']} #{MERGED_PRG} >/tmp/x64sc.log 2>&1 || exit 0"
+end
+
+# Load snaphot in running emulator and run the code
+desc "Load snapshot and run code in running emulator."
+task :snap => :update_snapshot do |t|
+  sh %Q(echo 'undump "#{VICE_SNAPSHOT}"'    | nc localhost 6510)
+  sh %Q(echo 'load_labels "#{VICE_LABELS}"' | nc localhost 6510)
+  sh %Q(echo 'goto .Init'                   | nc localhost 6510)
 end
 
 # Clean up
