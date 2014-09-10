@@ -84,6 +84,7 @@ MERGED_PRG     = "#{PROJECT}-merged.prg"
 VICE_SNAPBASE  = "#{SHARED}/x64sc-snapshot.vsf"
 VICE_SNAPSHOT  = 'snapshot.vsf'
 VICE_LABELS    = 'labels.txt'
+VICE_MONITOR   = 'localhost 6510'
 
 STARTUP = (LINKABLE ? 'startup-nobasic' : 'startup')
 
@@ -166,9 +167,14 @@ task :snap => :update_snapshot do |t|
       sleep 4
     end
   end
-  sh %Q(echo 'undump "#{VICE_SNAPSHOT}"'    | nc localhost 6510)
-  sh %Q(echo 'load_labels "#{VICE_LABELS}"' | nc localhost 6510 >/dev/null)
-  sh %Q(echo 'goto .Init'                   | nc localhost 6510)
+  monitor_commands = <<-"END".gsub(/^\s+/, '')
+    echo 'undump "#{VICE_SNAPSHOT}"'
+    echo 'load_labels "#{VICE_LABELS}"'
+    echo 'goto .Init'
+  END
+  monitor_commands.each_line do |line|
+    sh "#{line.chomp} | nc #{VICE_MONITOR} >/dev/null"
+  end
 end
 
 # Clean up
