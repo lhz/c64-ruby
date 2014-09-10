@@ -159,8 +159,15 @@ end
 # Load snaphot in running emulator and run the code
 desc "Load snapshot and run code in running emulator."
 task :snap => :update_snapshot do |t|
+  # Start emulator if needed
+  sh "lsof -i tcp:6510 | grep -q x64sc" do |ok, res|
+    if !ok
+      sh "nohup x64sc -remotemonitor </dev/null >/tmp/x64sc.log 2>&1 &"
+      sleep 4
+    end
+  end
   sh %Q(echo 'undump "#{VICE_SNAPSHOT}"'    | nc localhost 6510)
-  sh %Q(echo 'load_labels "#{VICE_LABELS}"' | nc localhost 6510)
+  sh %Q(echo 'load_labels "#{VICE_LABELS}"' | nc localhost 6510 >/dev/null)
   sh %Q(echo 'goto .Init'                   | nc localhost 6510)
 end
 
