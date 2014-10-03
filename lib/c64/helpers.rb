@@ -19,5 +19,15 @@ module C64
         f.write Array(data.flatten).pack('C*')
       end
     end
+
+    # Dump an array of bytes as an assembly table
+    def dump_bytes(label:, data:, per_line: 16, format: '$%02X')
+      print "#{label}:"
+      puts data.each_slice(per_line).map { |line|
+        "\t.byte " +
+        line.map {|byte| format % byte }.join(',')
+      }.join "\n"
+      print "\n"
+    end
   end
 end
