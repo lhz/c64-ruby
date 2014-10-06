@@ -71,7 +71,9 @@ class C64::Prototype
     draw if respond_to? :draw
     @surface.flip
     if @framedump && @frame < @framedump[:count]
-      @surface.savebmp "#{@framedump[:path]}/frame-#{'%04d' % @frame}.bmp"
+      if @framedump[:every].nil? || (@frame % @framedump[:every] == 0)
+        @surface.savebmp "#{@framedump[:path]}/frame-#{'%04d' % @frame}.bmp"
+      end
     end
     @frame += 1
   end
