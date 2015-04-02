@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+# Usage: png2hires <source> <target> [bgrcol=0]
+#
+# Convert a 320x200 PNG image to Interpaint hires format
+
+$:.unshift File.expand_path('../../lib', __FILE__)
+require 'c64'
+require 'c64/image'
+
+source  = ARGV[0]
+target  = ARGV[1]
+address = Integer(ARGV[2] || 0x4000)
+
+source && target or
+  fail "Usage: #{$0} <source> <target> [address=0x4000]"
+
+image = C64::Image.new(source)
+File.open(target, 'wb') do |file|
+  file.write [address].pack('S')
+  file.write image.to_hires.pack('C*')
+end
