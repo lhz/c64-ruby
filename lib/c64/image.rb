@@ -90,7 +90,7 @@ module C64
       if options[:fast]
         double = [width / 2, height].min.times.all? { |i|
           # self[i, i] == self[i, i + 1]
-          @png[i * 2, i] = @png[i * 2 + 1, i]
+          @png[i * 2, i] == @png[i * 2 + 1, i]
         }
       else
         double = height.times.all? { |y|
@@ -130,17 +130,17 @@ module C64
 
     # Extract multicolor charset
     def charset_multi(x, y, cols, rows, clist)
-      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , :debug => true
+      # pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , :debug => true
       Matrix.build(rows, cols).flat_map do |r, c|
-        char_multi 8 * c, 8 * r, clist
+        char_multi x + 8 * c, y + 8 * r, clist
       end
     end
 
     # Extract hires charset
     def charset_hires(x, y, cols, rows, color)
-      pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , :debug => true
+      # pixel_matrix :x => x, :y => y, :w => 8 * cols, :h => 8 * rows # , :debug => true
       Matrix.build(rows, cols).flat_map do |r, c|
-        char_hires 8 * c, 8 * r, color
+        char_hires x + 8 * c, y + 8 * r, color
       end
     end
 
