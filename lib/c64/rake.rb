@@ -13,9 +13,14 @@ class Rake::Task
   end
 
   def on_change(io = nil, &block)
-    if io && io.respond_to?(:keys) && io.keys.size == 1
-      self.input  = io.keys.first
-      self.output = io.values.first
+    if io && io.respond_to?(:keys)
+      if io.keys.size == 1
+        self.input  = io.keys.first
+        self.output = io.values.first
+      else
+        self.input  = io.keys
+        self.output = io.values
+      end
     end
     # Depend on input and task file
     deps = Array(input) + [caller[0].split(':').first]
