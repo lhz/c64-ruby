@@ -179,5 +179,28 @@ module C64
       end
       [hue, sat, luma]
     end
+
+    # Convert HSL triplet (0-360, 0-1, 0-1) to 24-bit RGB value
+    def self.hsl_to_rgb(h, s, l)
+      m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s
+      m1 = l * 2.0 - m2;
+
+      hue2rgb = lambda do |m1x, m2x, hx|
+        hx = (hx < 0) ? hx + 1 : ((hx > 1) ? hx - 1 : hx)
+        if (hx * 6.0 < 1)
+          m1x + (m2x - m1x) * hx * 6.0
+        elsif (hx * 2.0 < 1)
+          m2x
+        elsif (hx * 3.0 < 2)
+          m1x + (m2x - m1x) * (0.666666666666666 - hx) * 6.0
+        else
+          m1x
+        end
+      end
+      r = Integer(255.999 * hue2rgb.call(m1, m2, h + 0.333333333333333))
+      g = Integer(255.999 * hue2rgb.call(m1, m2, h))
+      b = Integer(255.999 * hue2rgb.call(m1, m2, h - 0.333333333333333))
+      (r << 16) + (b << 8) + b
+    end
   end
 end
