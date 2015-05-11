@@ -227,9 +227,9 @@ module C64
       bitmap + screen + colmap + [bcol]
     end
 
-    def to_hires
+    def to_hires(sort_first = false)
       cells = Matrix.build(25, 40).map do |row, column|
-        cell_hires(column, row)
+        cell_hires(column, row, sort_first)
       end
       screen = cells.map {|c| c[0] }
       bitmap = cells.flat_map {|c| c[1] }
