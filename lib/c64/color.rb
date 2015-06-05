@@ -131,7 +131,9 @@ module C64
     # Guess C64 color index from given 24-bit RGB value
     def self.guess_from_rgb(value)
       hue, sat, luma = rgb_to_hsl(value)
-      if sat < 0.15
+      if luma < 0.07
+        0
+      elsif sat < 0.15
         case luma * 100
         when  0...10 then 0
         when 10...35 then 11
