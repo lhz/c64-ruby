@@ -6,12 +6,14 @@ module C64
   class Image
 
     attr_reader :bitmap, :colmap, :screen
-    attr_writer :debug
+    attr_writer :debug, :xoffset, :yoffset
 
     # Read image/frames from given filename
     def initialize(filename)
       @png = ChunkyPNG::Image.from_file(filename)
       @debug = [:double_pixels_detected?]
+      @xoffset = 0
+      @yoffset = 0
     end
 
     # Width of image in pixels
@@ -50,17 +52,17 @@ module C64
 
     # Read the color index of a pixel
     def [](x, y)
-      check_bounds(x, y)
-      pixels[y, x]
+      check_bounds(x + @xoffset, y + @yoffset)
+      pixels[y + @yoffset, x + @xoffset]
     end
 
     # Modify the color index of a pixel
     def []=(x, y, color)
       pixels unless @pixels
-      check_bounds(x, y)
-      @pixels[y, x] = color
+      check_bounds(x + @xoffset, y + @yoffset)
+      @pixels[y + @yoffset, x + @xoffset] = color
       if pixel_width == 2
-        @pixels[y, (x % 2 == 0) ? x + 1 : x - 1] = color
+        @pixels[y + @yoffset, (x % 2 == 0) ? x + @xoffset + 1 : x + @xoffset - 1] = color
       end
     end
 
@@ -179,7 +181,7 @@ module C64
       colors = [1, 0, 2].map {|i| clist[i] }
       4.times.map { |n|
         # puts "XXX: byte_multi: pixel y=#{y}, x=#{xx}"
-        pixels[y, x + n * pixel_width]
+        pixels[y + @yoffset, x + @xoffset + n * pixel_width]
       }.each_with_object([0, 64]) { |c, o|
         o[0] += o[1] * lookup_color(c, colors)
         o[1] >>= 2
@@ -189,7 +191,7 @@ module C64
     # Extract byte value of 8 hires pixels
     def byte_hires(x, y, color)
       debug __method__, {x: x, y: y, color: color}
-      pixels[y, x..(x+7)].each_with_object([0, 128]) { |c, o|
+      pixels[y + @yoffset, (x + @offset)..(x+@xoffset+7)].each_with_object([0, 128]) { |c, o|
         o[0] += o[1] if c == color
         o[1] >>= 1
       }[0]
@@ -227,9 +229,9 @@ module C64
       bitmap + screen + colmap + [bcol]
     end
 
-    def to_hires(sort_first = false)
+    def to_hires(opts = {})
       cells = Matrix.build(25, 40).map do |row, column|
-        cell_hires(column, row, sort_first)
+        cell_hires(column, row, opts)
       end
       screen = cells.map {|c| c[0] }
       bitmap = cells.flat_map {|c| c[1] }
@@ -238,7 +240,7 @@ module C64
 
     def cell_multi(column, row, bcol = 0, sort_first = false)
       cpix = Matrix.build(8, 4).flat_map do |y, x|
-        pixels[8 * row + y, 8 * column + pixel_width * x]
+        pixels[8 * row + y + @yoffset, 8 * column + pixel_width * x + @xoffset]
       end
       if sort_first
         cols = (most_used_colors(cpix, bcol).sort + [bcol] * 3).first(3)
@@ -259,11 +261,11 @@ module C64
       [cols[0] * 16 + cols[1], cols[2], bytes]
     end
 
-    def cell_hires(column, row, sort_first = false)
+    def cell_hires(column, row, opts = {})
       cpix = Matrix.build(8, 8).flat_map do |y, x|
-        pixels[8 * row + y, 8 * column + pixel_width * x]
+        pixels[8 * row + y + @yoffset, 8 * column + pixel_width * x + @xoffset]
       end
-      if sort_first
+      if opts[:sort_first]
         cols = (most_used_colors(cpix, nil).sort + [0] * 2).first(2)
       else
         cols = (most_used_colors(cpix, nil) + [0] * 3).first(2).sort

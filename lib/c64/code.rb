@@ -127,7 +127,7 @@ module C64::Code
     mnemonic, mode = mnemonic.to_s.split('_').map(&:to_sym) if mode.nil?
     opcodes.find { |op|
       op[1] == mnemonic.upcase && op[2] == mode.downcase
-    } or raise "Bad opcode: #{code.inspect}"
+    } or raise "Bad opcode: #{mnemonic} #{mode}"
   end
 
   def opcodes
