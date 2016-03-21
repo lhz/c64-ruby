@@ -191,7 +191,7 @@ module C64
     # Extract byte value of 8 hires pixels
     def byte_hires(x, y, color)
       debug __method__, {x: x, y: y, color: color}
-      pixels[y + @yoffset, (x + @offset)..(x+@xoffset+7)].each_with_object([0, 128]) { |c, o|
+      pixels[y + @yoffset, (x + @yoffset)..(x + @xoffset + 7)].each_with_object([0, 128]) { |c, o|
         o[0] += o[1] if c == color
         o[1] >>= 1
       }[0]
