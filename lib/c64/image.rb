@@ -11,7 +11,7 @@ module C64
     # Read image/frames from given filename
     def initialize(filename)
       @png = ChunkyPNG::Image.from_file(filename)
-      @debug = [:double_pixels_detected?]
+      @debug = [] # [:double_pixels_detected?]
       @xoffset = 0
       @yoffset = 0
     end
@@ -102,7 +102,7 @@ module C64
           }
         }
       end
-      puts "Pixel width detected to be #{double ? 2 : 1}."
+      debug __method__, {double: double}
       double
     end
 
