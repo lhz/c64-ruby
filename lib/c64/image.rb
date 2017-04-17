@@ -80,6 +80,15 @@ module C64
       png.save(filename)
     end
 
+    def png_blob(palette = :pepto)
+      png = ChunkyPNG::Image.new(width, height)
+      height.times do |y|
+        width.times do |x|
+          png[x, y] = ((C64::Color.to_rgb(pixels[y, x], palette) << 8) | 0xFF)
+        end
+      end
+      png.to_blob
+    end
 
     # private
 
