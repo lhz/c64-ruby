@@ -131,8 +131,8 @@ module C64
 
     # Convert image to two-dimentional array of C64 color indexes
     def pixels(rect = full_rectangle)
+      cmap = {}
       if @method == :closest
-        cmap = {}
         @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
           value = @png[x, y] >> 8
           if cmap.key?(value)
@@ -145,7 +145,8 @@ module C64
         end
       else
         @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-          C64::Color.from_rgba @png[x, y]
+          value = @png[x, y]
+          cmap[value] ||= C64::Color.from_rgba value
         end
       end
     end
