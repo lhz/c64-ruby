@@ -49,7 +49,7 @@ module C64
       ],
       vice_new: [
         0x000000, 0xffffff, 0xb85438, 0x8decff,
-        0xba56e4, 0x79d949, 0x553de1, 0xfbff79,
+        0xba56e4, 0x79d949, 0x553ee5, 0xfbff79,
         0xbd7c1b, 0x7e6400, 0xf29580, 0x6f716e,
         0xa2a4a1, 0xcdff9d, 0xa18aff, 0xd3d5d2,
       ],
@@ -150,6 +150,24 @@ module C64
       @merged_palettes ||= PALETTES.values.each_with_object({}) do |a, h|
         h.merge! Hash[a.map.with_index.to_a]
       end
+    end
+
+    # Guess C64 color index from given 24-bit RGB value and palette
+    def self.closest_in_palette(value, palette)
+      vr, vg, vb = ((value & 0xFF0000) >> 16), ((value & 0xFF00) >> 8), value & 0xFF
+      closest  = nil
+      dist_min = 9
+      PALETTES[palette].each_with_index do |p, i|
+        pr, pg, pb = ((p & 0xFF0000) >> 16), ((p & 0xFF00) >> 8), p & 0xFF
+        dist = (((pr - vr) / 256.0) ** 2) +
+               (((pg - vg) / 256.0) ** 2) +
+               (((pb - vb) / 256.0) ** 2)
+        if dist < dist_min
+          dist_min = dist
+          closest  = i
+        end
+      end
+      closest
     end
 
     # Guess C64 color index from given 24-bit RGB value

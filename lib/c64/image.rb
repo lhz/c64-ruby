@@ -14,6 +14,13 @@ module C64
       @debug = [] # [:double_pixels_detected?]
       @xoffset = 0
       @yoffset = 0
+      @method = :guess
+      @method_param = nil
+    end
+
+    def method_closest(palette)
+      @method = :closest
+      @method_param = palette
     end
 
     # Width of image in pixels
@@ -124,8 +131,22 @@ module C64
 
     # Convert image to two-dimentional array of C64 color indexes
     def pixels(rect = full_rectangle)
-      @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-        C64::Color.from_rgba @png[x, y]
+      if @method == :closest
+        cmap = {}
+        @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
+          value = @png[x, y] >> 8
+          if cmap.key?(value)
+            cmap[value]
+          else
+            index = C64::Color.closest_in_palette(@png[x, y] >> 8, @method_param)
+            # puts "CMAP: #{value.to_s(16)} => #{index}"
+            cmap[value] = index
+          end
+        end
+      else
+        @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
+          C64::Color.from_rgba @png[x, y]
+        end
       end
     end
 
@@ -245,6 +266,23 @@ module C64
       screen = cells.map {|c| c[0] }
       bitmap = cells.flat_map {|c| c[1] }
       bitmap + screen
+    end
+
+    # def cell_multi?(column, row, bcol = 0)
+    #   cpix = Matrix.build(8, 8).flat_map do |y, x|
+    #     pixels[8 * row + y + @yoffset, 8 * column + x + @xoffset]
+    #   end
+    #   puts cpix.inspect
+    #   cpix.each.with_index do |p, i|
+    #     return false if i.odd? && p[i] != p[i - 1]
+    #   end
+    #   return true
+    # end
+
+    def cpix(column, row)
+      cpix = Matrix.build(8, 4).flat_map do |y, x|
+        pixels[8 * row + y + @yoffset, 8 * column + pixel_width * x + @xoffset]
+      end
     end
 
     def cell_multi(column, row, bcol = 0, sort_first = false)
