@@ -97,6 +97,27 @@ module C64
       png.to_blob
     end
 
+    def match_palette
+      cols = @png.palette.to_a.map { |v| ("%08x" % v)[0..5].hex }
+      best_match = nil
+      best_count = 0
+      dist = C64::Color::PALETTES.map do |key, pcols|
+        count = cols.count { |c| pcols.include? c }
+        if count == cols.size # Exact match
+          # puts "match_palette: Exact match with :#{key}"
+          return [key, cols.size, count]
+        end
+        if count > best_count
+          best_count = count
+          best_match = key
+        end
+      end
+      unless best_match && best_count > 2 && best_count >= cols.size / 2
+        raise "No palette match for: #{cols.map { |c| "0x%06x" % c }.join ','}"
+      end
+      return [best_match, cols.size, best_count]
+    end
+
     # private
 
 
