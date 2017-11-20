@@ -23,6 +23,14 @@ module C64
       @method_param = palette
     end
 
+    def method_indexes(indexes)
+      @method = :indexes
+      @method_param = @png.palette.to_a.map.with_index { |v, i|
+        puts "%s => %d" % [("%08X" % v), indexes[i]]
+        [v, indexes[i]]
+      }.to_h
+    end
+
     # Width of image in pixels
     def width
       @png.width
@@ -163,6 +171,12 @@ module C64
             # puts "CMAP: #{value.to_s(16)} => #{index}"
             cmap[value] = index
           end
+        end
+      elsif @method == :indexes
+        @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
+          value = @png[x, y]
+          @method_param[value] or
+            raise "Unmapped colour: #{value.to_s(16)}"
         end
       else
         @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|

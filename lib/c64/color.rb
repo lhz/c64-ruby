@@ -53,6 +53,12 @@ module C64
         0xbd7c1b, 0x7e6400, 0xf29580, 0x6f716e,
         0xa2a4a1, 0xcdff9d, 0xa18aff, 0xd3d5d2,
       ],
+      vice_shot: [
+        0x000000, 0xffffff, 0xae593f, 0x9ce9fc,
+        0xaf5bec, 0x88d63e, 0x553ee5, 0xfeff75,
+        0xb68119, 0x7a6600, 0xe79a84, 0x727272,
+        0xa4a4a4, 0xd5ff97, 0x9f8bff, 0xd5d5d5,
+      ],
       levy: [
         0x040204, 0xfcfefc, 0xcc3634, 0x84f2dc,
         0xcc5ac4, 0x5cce34, 0x4436cc, 0xf4ee5c,
@@ -76,7 +82,13 @@ module C64
         0xa82cb7, 0x3fc033, 0x2926d3, 0xf5f841,
         0xa84a14, 0x643800, 0xe56067, 0x4a4a4a,
         0x7b7b7b, 0x8fff81, 0x6a66ff, 0xb2b2b2,
-      ]
+      ],
+      unknown1: [
+        0x000000, 0xffffff, 0x894036, 0x7abfc7,
+        0x8a46ae, 0x68a941, 0x3e31a2, 0xd0dc71,
+        0x905f25, 0x5c4700, 0xbb776d, 0x555555,
+        0x808080, 0xacea88, 0x7c70da, 0xababab,
+      ],
     }
 
     module CoreExtensions
@@ -160,6 +172,7 @@ module C64
 
     # Guess C64 color index from given 24-bit RGB value and palette
     def self.closest_in_palette(value, palette)
+      raise "Unknown palette '#{palette}'" unless PALETTES.key?(palette)
       vr, vg, vb = ((value & 0xFF0000) >> 16), ((value & 0xFF00) >> 8), value & 0xFF
       closest  = nil
       dist_min = 9
