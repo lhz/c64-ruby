@@ -10,6 +10,7 @@ module C64
 
     # Read image/frames from given filename
     def initialize(filename)
+      @filename = filename
       @png = ChunkyPNG::Image.from_file(filename)
       @debug = [] # [:double_pixels_detected?]
       @xoffset = 0
@@ -122,6 +123,12 @@ module C64
       end
       unless best_match && best_count > 2 && best_count >= cols.size / 2
         raise "No palette match for: #{cols.map { |c| "0x%06x" % c }.join ','}"
+      end
+      if ENV['DEBUG'] && cols.size > best_count
+        matched   = (cols & C64::Color::PALETTES[best_match]).map { |c| ("%06x" % c) }
+        unmatched = (cols - C64::Color::PALETTES[best_match]).map { |c| ("%06x" % c) }
+        puts "  MATCHED: #{matched.join ', '}"
+        puts "UNMATCHED: #{unmatched.join ', '}"
       end
       return [best_match, cols.size, best_count]
     end
@@ -324,6 +331,9 @@ module C64
     def cell_multi(column, row, bcol = 0, sort_first = false)
       cpix = Matrix.build(8, 4).flat_map do |y, x|
         pixels[8 * row + y + @yoffset, 8 * column + pixel_width * x + @xoffset]
+      end
+      if (cpix.uniq - [bcol]).size > 3
+        $stderr.puts "WARNING: #{@filename} has too many colours at [#{column}, #{row}]: #{cpix.uniq.join ','}"
       end
       if sort_first
         cols = (most_used_colors(cpix, bcol).sort + [bcol] * 3).first(3)
