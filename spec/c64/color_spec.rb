@@ -91,7 +91,7 @@ describe C64::Color do
   describe "guess_from_rgb" do
     it "correctly guesses the index of all colors in standard palettes" do
       [:pepto, :vice, :vice_old].each do |palette|
-        C64::Color::PALETTES[palette].each_with_index do |rgb, index|
+        C64::Color.palettes[palette].each_with_index do |rgb, index|
           subject.guess_from_rgb(rgb).should eq index
         end
       end

@@ -110,7 +110,7 @@ module C64
       cols = @png.palette.to_a.map { |v| ("%08x" % v)[0..5].hex }
       best_match = nil
       best_count = 0
-      dist = C64::Color::PALETTES.map do |key, pcols|
+      dist = C64::Color.palettes.map do |key, pcols|
         count = cols.count { |c| pcols.include? c }
         if count == cols.size # Exact match
           # puts "match_palette: Exact match with :#{key}"
@@ -125,8 +125,8 @@ module C64
         raise "No palette match for: #{cols.map { |c| "0x%06x" % c }.join ','}"
       end
       if ENV['DEBUG'] && cols.size > best_count
-        matched   = (cols & C64::Color::PALETTES[best_match]).map { |c| ("%06x" % c) }
-        unmatched = (cols - C64::Color::PALETTES[best_match]).map { |c| ("%06x" % c) }
+        matched   = (cols & C64::Color.palettes[best_match]).map { |c| ("%06x" % c) }
+        unmatched = (cols - C64::Color.palettes[best_match]).map { |c| ("%06x" % c) }
         puts "  MATCHED: #{matched.join ', '}"
         puts "UNMATCHED: #{unmatched.join ', '}"
       end
