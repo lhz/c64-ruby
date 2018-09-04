@@ -5,7 +5,7 @@ require 'c64/color'
 module C64
   class Image
 
-    attr_reader :bitmap, :colmap, :screen
+    attr_reader :bitmap, :colmap, :screen, :colorbugs
     attr_writer :debug, :xoffset, :yoffset
 
     # Read image/frames from given filename
@@ -17,6 +17,7 @@ module C64
       @yoffset = 0
       @method = :guess
       @method_param = nil
+      @colorbugs = []
     end
 
     def method_closest(palette)
@@ -333,7 +334,8 @@ module C64
         pixels[8 * row + y + @yoffset, 8 * column + pixel_width * x + @xoffset]
       end
       if (cpix.uniq - [bcol]).size > 3
-        $stderr.puts "WARNING: #{@filename} has too many colours at [#{column}, #{row}]: #{cpix.uniq.join ','}"
+        @colorbugs << [column, row, cpix.uniq]
+        # $stderr.puts "WARNING: #{@filename} has too many colours at [#{column}, #{row}]: #{cpix.uniq.join ','}" if ENV['DEBUG']
       end
       if sort_first
         cols = (most_used_colors(cpix, bcol).sort + [bcol] * 3).first(3)
