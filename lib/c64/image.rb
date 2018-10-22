@@ -171,24 +171,24 @@ module C64
       cmap = {}
       if @method == :closest
         @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-          value = @png[x, y] >> 8
+          value = @png[rect.xmin + x, rect.ymin + y] >> 8
           if cmap.key?(value)
             cmap[value]
           else
-            index = C64::Color.closest_in_palette(@png[x, y] >> 8, @method_param)
+            index = C64::Color.closest_in_palette(@png[rect.xmin + x, rect.ymin + y] >> 8, @method_param)
             # puts "CMAP: #{value.to_s(16)} => #{index}"
             cmap[value] = index
           end
         end
       elsif @method == :indexes
         @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-          value = @png[x, y]
+          value = @png[rect.xmin + x, rect.ymin + y]
           @method_param[value] or
             raise "Unmapped colour: #{value.to_s(16)}"
         end
       else
         @pixels ||= Matrix.build(rect.height, rect.width) do |y, x|
-          value = @png[x, y]
+          value = @png[rect.xmin + x, rect.ymin + y]
           cmap[value] ||= C64::Color.from_rgba value
         end
       end
