@@ -301,12 +301,12 @@ module C64
             pix = cpix(col, row).uniq
             candidates &= pix if pix.size > 3
             throw :found if candidates.size == 1
-            puts "detect_bgcol: candidates are now #{candidates.inspect}"
           end
         end
       end
       candidates.size > 0 or
         raise "No background color candidates!"
+      puts "DETECTED BACKGROUND COLOUR(S): #{candidates.inspect}"
       candidates.first
     end
 
