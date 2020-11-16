@@ -306,7 +306,7 @@ module C64
       end
       candidates.size > 0 or
         raise "No background color candidates!"
-      if pref && candidates.includes?(pref)
+      if pref && candidates.include?(pref)
         pick = pref
       else
         pick = candidates.first
