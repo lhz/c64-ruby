@@ -305,7 +305,7 @@ module C64
           end
         end
       end
-      if candidates.empty?
+      candidates.size > 0 or
         raise "No background color candidates!"
       candidates.first
     end
