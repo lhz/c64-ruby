@@ -293,7 +293,7 @@ module C64
       end
     end
 
-    def detect_bgcol(pref = nil)
+    def detect_bgcol(preferred = nil)
       candidates = (0..15).to_a
       catch :found do
         25.times do |row|
@@ -306,13 +306,11 @@ module C64
       end
       candidates.size > 0 or
         raise "No background color candidates!"
-      if pref && candidates.include?(pref)
-        pick = pref
+      if preferred && candidates.include?(preferred)
+        preferred
       else
-        pick = candidates.first
+        candidates.first
       end
-      puts "DETECTED BACKGROUND COLOUR: #{pick}"
-      pick
     end
 
     def to_koala(bcol)
