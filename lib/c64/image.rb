@@ -293,7 +293,22 @@ module C64
       end
     end
 
+    def detect_bgcol
+      candidates = (0..15).to_a
+      catch :found do
+        25.times do |row|
+          40.times do |col|
+            pix = cpix(col, row).uniq
+            candidates &= pix if pix.size > 3
+            throw :found if candidates.size == 1
+          end
+        end
+      end
+      candidates.first
+    end
+
     def to_koala(bcol)
+      bcol = detect_bgcol unless bcol
       cells = Matrix.build(25, 40).map do |row, column|
         cell_multi(column, row, bcol)
       end
