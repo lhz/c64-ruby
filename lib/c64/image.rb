@@ -313,7 +313,7 @@ module C64
       end
     end
 
-    def to_koala(bcol)
+    def to_koala(bcol, align: false)
       bcol = detect_bgcol unless bcol
       cells = Matrix.build(25, 40).map do |row, column|
         cell_multi(column, row, bcol)
@@ -321,6 +321,10 @@ module C64
       screen = cells.map {|c| c[0] }
       colmap = cells.map {|c| c[1] }
       bitmap = cells.flat_map {|c| c[2] }
+      if align
+        bitmap += [0]*192
+        screen += [0]*24
+      end
       bitmap + screen + colmap + [bcol]
     end
 
