@@ -3,6 +3,11 @@ require 'json'
 module C64
   module Color
 
+    CONFIG_LOCATIONS = [
+      File.expand_path("./vic-palettes.json"),
+      File.expand_path("~/.config/vic-palettes.json"),
+    ]
+
     module Names
       BLACK        = 0
       WHITE        = 1
@@ -46,7 +51,9 @@ module C64
     end
 
     def self.read_palettes_json
-      data = JSON.parse(File.read File.expand_path("~/.config/vic-palettes.json"))
+      config_file = CONFIG_LOCATIONS.find { |path| File.exists?(path) } or
+        raise "No palette config found at: #{CONFIG_LOCATIONS}"
+      data = JSON.parse(File.read(config_file))
       data.each_with_object({}) do |(key, value), h|
         h[key.to_sym] = value.split(/\s*,\s*/).map(&:hex)
       end

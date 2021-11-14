@@ -65,7 +65,7 @@ describe C64::Image do
       end
       it "accepts values 1 and 2 only" do
         [0, 1.5, 2.01, 3].each do |value|
-          expect { image.pixel_width = value }.to raise_error
+          expect { image.pixel_width = value }.to raise_error(RuntimeError)
         end
       end
     end

@@ -1,20 +1,29 @@
 require 'c64/color'
 
+
+# Override where to look for palette config
+verbose_save, $VERBOSE = $VERBOSE, nil
+C64::Color::CONFIG_LOCATIONS = [
+  File.expand_path("spec/fixtures/vic-palettes.json")
+]
+$VERBOSE = verbose_save
+
+
 describe C64::Color do
 
   class TestNames; include C64::Color::Names; end
 
   describe C64::Color::Names do
     it "exposes color names as constants" do
-      TestNames.const_get('LIGHT_BLUE').should eq 14
+      expect(TestNames.const_get('LIGHT_BLUE')).to eq 14
     end
   end
 
   describe C64::Color::CoreExtensions do
     include C64::Color::CoreExtensions
     it "adds method #color to Symbol, returning color index" do
-      :blue.should respond_to(:color)
-      :blue.color.should eq 6
+      expect(:blue).to respond_to(:color)
+      expect(:blue.color).to eq 6
     end
     it "adds method #color to Fixnum, returning color index" do
       0xF0F020.should respond_to(:color)
@@ -38,24 +47,24 @@ describe C64::Color do
 
   describe "from_rgba" do
     it "delegates to from_rgb without the alpha component" do
-      subject.should_receive(:from_rgb).with(0x123456, nil).once
+      expect(subject).to receive(:from_rgb).with(0x123456, nil).once
       subject.from_rgba(0x12345678)
-      subject.should_receive(:from_rgb).with(0x010203, 123).once
+      expect(subject).to receive(:from_rgb).with(0x010203, 123).once
       subject.from_rgba(0x010203FF, 123)
     end
   end
 
   describe "from_rgb" do
     it "looks up index in palette and returns it" do
-      subject.should_not_receive(:guess_from_rgb)
+      expect(subject).not_to receive(:guess_from_rgb)
       subject.from_rgb(0x8F8F8F).should eq 15
     end
     it "looks up index in palette and uses passed default when not found" do
-      subject.should_not_receive(:guess_from_rgb)
+      expect(subject).not_to receive(:guess_from_rgb)
       subject.from_rgb(0x123456, 123).should eq 123
     end
     it "looks up index in palette and calls guess_from_rgb when not found" do
-      subject.should_receive(:guess_from_rgb).with(0x123456).once
+      expect(subject).to receive(:guess_from_rgb).with(0x123456).once
       subject.from_rgb(0x123456)
     end
   end
@@ -71,13 +80,13 @@ describe C64::Color do
 
   describe "merged_palettes" do
     it "returns a hash with 24-bit color values as keys" do
-      subject.merged_palettes.keys.all? {|k| (0...2**24).include? k }.should be_true
+      subject.merged_palettes.keys.all? {|k| (0...2**24).include? k }.should be_truthy
     end
     it "returns a hash with at least 16 distinct keys" do
       subject.merged_palettes.keys.sort.uniq.size.should be >= 16
     end
     it "returns a hash with C64 color indices as values" do
-      subject.merged_palettes.values.all? {|v| (0..15).include? v }.should be_true
+      subject.merged_palettes.values.all? {|v| (0..15).include? v }.should be_truthy
     end
   end
 
@@ -120,7 +129,7 @@ describe C64::Color do
 
   describe "xterm256_dump" do
     it "starts with an ANSI sequence to set background color" do
-      subject.should_receive(:xterm256_escape).with(4, true).once.and_call_original
+      expect(subject).to receive(:xterm256_escape).with(4, true).once.and_call_original
       subject.xterm256_dump(4)
     end
     it "ends with a sequence of spaces" do
