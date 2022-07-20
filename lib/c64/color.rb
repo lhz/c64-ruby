@@ -84,7 +84,7 @@ module C64
       if palettes.has_key? palette
         palettes[palette][index]
       else
-        raise "Invalid palette key :#{palette}."
+        raise "Invalid palette key :#{palette}, valid keys are: #{palettes.keys.join(', ')}"
       end
     end
 
