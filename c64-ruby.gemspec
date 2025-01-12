@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.0'
 
+  gem.add_dependency "matrix", "~> 0.4"
   gem.add_dependency "chunky_png", "~> 1.2"
   gem.add_dependency "rubygame", "~> 2.6.4"
 

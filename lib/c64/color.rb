@@ -51,7 +51,7 @@ module C64
     end
 
     def self.read_palettes_json
-      config_file = CONFIG_LOCATIONS.find { |path| File.exists?(path) } or
+      config_file = CONFIG_LOCATIONS.find { |path| File.exist?(path) } or
         raise "No palette config found at: #{CONFIG_LOCATIONS}"
       data = JSON.parse(File.read(config_file))
       data.each_with_object({}) do |(key, value), h|

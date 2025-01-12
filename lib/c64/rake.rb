@@ -31,8 +31,8 @@ class Rake::Task
   end
 
   def dependencies_changed?(sources = prerequisites, targets = [name])
-    sources = sources.dup.select {|f| File.exists?(f) }
-    targets = targets.dup.select {|f| File.exists?(f) }
+    sources = sources.dup.select {|f| File.exist?(f) }
+    targets = targets.dup.select {|f| File.exist?(f) }
     if sources.empty?
       debug "Source files do not exist."
       return true
@@ -65,7 +65,7 @@ CA65_OPTS << '-D LINKABLE=1' if LINKABLE
 if !(defined? SHARED)
   path = Dir.pwd
   while path != '/'
-    if File.exists?(File.join(path, 'shared/linker.cfg'))
+    if File.exist?(File.join(path, 'shared/linker.cfg'))
       SHARED = File.join(path, 'shared')
       break
     end
@@ -77,7 +77,7 @@ if !(defined? SHARED)
 end
 
 LINKER_CFG =
-  if File.exists?('linker.cfg')
+  if File.exist?('linker.cfg')
     'linker.cfg'
   else 
     File.join(SHARED, 'linker.cfg')
@@ -189,6 +189,6 @@ task :clean do
 end
 
 # Set default task - run program
-#if File.exists?("#{PROJECT}.s")
+#if File.exist?("#{PROJECT}.s")
 #  task :default => :run
 #end
